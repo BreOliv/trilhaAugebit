@@ -92,7 +92,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     
 } else {
     // Se alguém acessar este arquivo diretamente, redireciona para a página de cadastro
-    header("Location: cadastro.php");
+    header("Location: ./pages/cadastro.php");
     exit();
 }
 
