@@ -17,11 +17,10 @@ try {
 }
 
 //Variáveis de Configuração do Sistema.
-$nome_sistema = 'Trilha Augebit';
+$nome_sistema = 'Trilha Augebit ';
 $email_sistema = 'admin@trilhaaugebit.com';
-$telefone_sistema = '(11)98765-4321';
-$endereco_sistema = '';
 $senha_sistema = '123';
+$nome_admin = '';
 
 // Verificar se as tabelas existem, caso contrário, criá-las
 $query = $pdo->query("SHOW TABLES LIKE 'cadastro_admin'");
@@ -29,7 +28,7 @@ if($query->rowCount() == 0){
     $pdo->query("
     CREATE TABLE cadastro_admin (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(100) NOT NULL,
+        nome_admin VARCHAR(100) NOT NULL,
         email VARCHAR(100) NOT NULL UNIQUE,
         sobrenome VARCHAR(100),
         genero VARCHAR(100),
@@ -52,7 +51,7 @@ if($query->rowCount() == 0){
     $pdo->query("
     CREATE TABLE usuario_config (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(100) NOT NULL,
+        nome_aluno VARCHAR(100) NOT NULL,
         foto_perfil VARCHAR(255),
         email VARCHAR(100) NOT NULL UNIQUE,
         senha VARCHAR(100) NOT NULL
@@ -61,7 +60,7 @@ if($query->rowCount() == 0){
     
     // Inserir um usuário padrão para configuração inicial
     $senha_padrao = 123;
-    $pdo->query("INSERT INTO usuario_config SET nome = '$nome_sistema', email = '$email_sistema', 
+    $pdo->query("INSERT INTO cadastro_admin SET nome_admin = '$nome_admin', email = '$email_sistema', 
     senha = '$senha_padrao'");
 
 $query = $pdo->query("SHOW TABLES LIKE 'cadastro_app'");
@@ -69,7 +68,7 @@ if($query->rowCount() == 0){
     $pdo->query("
     CREATE TABLE cadastro_app (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(100) NOT NULL,
+        nome_aluno VARCHAR(100) NOT NULL,
         email VARCHAR(100) NOT NULL UNIQUE,
         senha VARCHAR(100) NOT NULL,
         foto_perfil VARCHAR(255)
@@ -114,13 +113,12 @@ if($query->rowCount() == 0){
     )");
 }
 
-/ Carregar configurações do usuário se existirem
-$query = $pdo->query("SELECT * FROM usuario_config LIMIT 1");
+// / Carregar configurações do usuário se existirem
+$query = $pdo->query("SELECT * FROM cadastro_admin LIMIT 1");
 $res = $query->fetchAll(PDO::FETCH_ASSOC);
 $total_reg = @count($res);
 
 if($total_reg > 0){
-    $nome_sistema = $res[0]['nome'];
+    $nome_admin = $res[0]['nome_admin'];
     $email_sistema = $res[0]['email'];
-    // Outras configurações que você desejar adicionar
 }

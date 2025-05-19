@@ -10,7 +10,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tipo_cadastro = isset($_POST['tipo_cadastro']) ? $_POST['tipo_cadastro'] : 'usuario';
     
     // Obtém os dados do formulário
-    $nome = addslashes($_POST['nome']);
+    $nome = addslashes($_POST['nome_admin']);
     $sobrenome = addslashes($_POST['sobrenome']); // Novo campo de sobrenome
     $email = addslashes($_POST['email']);
     $genero = addslashes($_POST['genero']); // Novo campo de gênero
@@ -30,16 +30,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
     
-    $query = $pdo->prepare("SELECT * FROM usuario_config WHERE email = :email");
-    $query->bindValue(":email", $email);
-    $query->execute();
-    
-    if($query->rowCount() > 0) {
-        echo '<script>alert("Email já cadastrado no sistema!")</script>';
-        echo '<script>window.location="cadastro.php"</script>';
-        exit();
-    }
-    
     try {
         // Inicia uma transação para garantir que todas as operações sejam realizadas
         $pdo->beginTransaction();
@@ -48,8 +38,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Cadastro de administrador
             
             // Insere na tabela cadastro_admin
-            $query = $pdo->prepare("INSERT INTO cadastro_admin (nome, sobrenome, email, genero, senha) VALUES (:nome, :sobrenome, :email, :genero, :senha)");
-            $query->bindValue(":nome", $nome);
+            $query = $pdo->prepare("INSERT INTO cadastro_admin (nome_admin, sobrenome, email, genero, senha) VALUES (:nome_admin, :sobrenome, :email, :genero, :senha)");
+            $query->bindValue(":nome_admin", $nome);
             $query->bindValue(":sobrenome", $sobrenome);
             $query->bindValue(":email", $email);
             $query->bindValue(":genero", $genero);
@@ -63,19 +53,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $query->execute();
             
             $mensagem = "Administrador cadastrado com sucesso!";
-        } else {
-            // Cadastro de usuário normal
-            
-            // Insere na tabela usuario_config
-            $query = $pdo->prepare("INSERT INTO usuario_config (nome, email, senha) VALUES (:nome, :email, :senha)");
-            $query->bindValue(":nome", $nome);
-            $query->bindValue(":email", $email);
-            $query->bindValue(":senha", $senha_int);
-            $query->execute();
-            
-            $mensagem = "Usuário cadastrado com sucesso!";
-        }
-        
+        } 
         // Finaliza a transação
         $pdo->commit();
         
@@ -87,12 +65,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         $pdo->rollBack();
         
         echo '<script>alert("Erro ao cadastrar usuário: ' . $e->getMessage() . '")</script>';
-        echo '<script>window.location="cadastro.php"</script>';
+        echo '<script>window.location="pages/cadastro.php"</script>';
     }
     
 } else {
     // Se alguém acessar este arquivo diretamente, redireciona para a página de cadastro
-    header("Location: ./pages/cadastro.php");
+    header("Location: /pages/cadastro.php");
     exit();
 }
 

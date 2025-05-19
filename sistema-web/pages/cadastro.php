@@ -38,7 +38,7 @@
     </style>
 </head>
 <body>
-    <?php require_once("conexao.php"); ?>
+    <?php require_once("../cadastrar.php"); ?>
 
     <div class="container">
         <div class="row justify-content-center">
@@ -53,8 +53,8 @@
                             <input type="hidden" name="tipo_cadastro" value="admin">
                             
                             <div class="form-group">
-                                <label for="nome">Nome:</label>
-                                <input type="text" class="form-control" id="nome" name="nome" required>
+                                <label for="nome_admin">Nome:</label>
+                                <input type="text" class="form-control" id="nome" name="nome_admin" required>
                             </div>
                             
                             <div class="form-group">
