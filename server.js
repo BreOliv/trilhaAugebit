@@ -18,5 +18,5 @@ app.get('*', (req, res) => {
 
 // Inicia o servidor no IP e porta especificados
 app.listen(PORT, HOST, () => {
-  console.log(`Servidor rodando em http://${HOST}:${3000}`);
+  console.log(`Servidor rodando em http://${HOST}:${PORT}`);
 });
