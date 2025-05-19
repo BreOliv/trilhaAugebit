@@ -29,11 +29,11 @@ if($query->rowCount() == 0){
     $pdo->query("
     CREATE TABLE cadastro_admin (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        usuario VARCHAR(100) NOT NULL,
+        nome VARCHAR(100) NOT NULL,
         email VARCHAR(100) NOT NULL UNIQUE,
-        telefone VARCHAR(20),
-        recuperar_senha VARCHAR(100),
-        foto_perfil VARCHAR(255)
+        sobrenome VARCHAR(100),
+        genero VARCHAR(100),
+        senha INT(11)
     )");
 }
 
@@ -43,7 +43,7 @@ if($query->rowCount() == 0){
     CREATE TABLE login_admin (
         id INT AUTO_INCREMENT PRIMARY KEY,
         email VARCHAR(100) NOT NULL UNIQUE,
-        senha VARCHAR(100) NOT NULL
+        senha INT(11) NOT NULL
     )");
 }
 
@@ -57,12 +57,12 @@ if($query->rowCount() == 0){
         email VARCHAR(100) NOT NULL UNIQUE,
         senha VARCHAR(100) NOT NULL
     )");
+}
     
     // Inserir um usuário padrão para configuração inicial
-    $senha_cript = md5($senha_sistema);
+    $senha_padrao = 123;
     $pdo->query("INSERT INTO usuario_config SET nome = '$nome_sistema', email = '$email_sistema', 
-    senha = '$senha_cript', foto_perfil = 'sem-foto.jpg'");
-}
+    senha = '$senha_padrao'");
 
 $query = $pdo->query("SHOW TABLES LIKE 'cadastro_app'");
 if($query->rowCount() == 0){
@@ -114,7 +114,7 @@ if($query->rowCount() == 0){
     )");
 }
 
-// Carregar configurações do usuário se existirem
+/ Carregar configurações do usuário se existirem
 $query = $pdo->query("SELECT * FROM usuario_config LIMIT 1");
 $res = $query->fetchAll(PDO::FETCH_ASSOC);
 $total_reg = @count($res);
@@ -124,7 +124,3 @@ if($total_reg > 0){
     $email_sistema = $res[0]['email'];
     // Outras configurações que você desejar adicionar
 }
-
-// Para mensagens via WhatsApp (removendo caracteres especiais)
-$whatsapp_sistema = '55'.preg_replace('/[ ()-]+/' , '' , $telefone_sistema);
-?>
