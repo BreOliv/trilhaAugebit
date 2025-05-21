@@ -1,20 +1,23 @@
 <?php
-// login.php - Página de login do sistema Augebit
 session_start();
+require_once __DIR__ . '/../conexao.php'; // Caminho corrigido e funcionando
 
-// Processamento do formulário de login (quando implementado)
 $loginError = "";
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario = $_POST['usuario'] ?? '';
     $senha = $_POST['senha'] ?? '';
-    
-    // Aqui você implementaria a validação real do login
-    // Exemplo simples (para demonstração apenas):
-    if ($usuario === "admin" && $senha === "123456") {
+
+    // Verifica se o email existe na tabela login_admin
+    $stmt = $pdo->prepare("SELECT * FROM login_admin WHERE email = ?");
+    $stmt->execute([$usuario]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Verificação direta (sem hash)
+    if ($user && $senha === $user['senha']) {
         $_SESSION['logado'] = true;
         $_SESSION['usuario'] = $usuario;
-        // Redirecionar para o dashboard
-        header("Location: dashboard.php");
+        header("Location: dashboard.php"); // Redireciona após login
         exit;
     } else {
         $loginError = "Usuário ou senha incorretos";
@@ -291,8 +294,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <a href="#" class="logo">
-        <img src="./img/Logo2.png" alt="Logo Augebit">
+        <img src="../img/Logo2.png" alt="Logo Augebit">
     </a>
+
 
     <div class="container">
         <div class="login-section">
@@ -305,8 +309,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                 <div class="form-group">
-                    <input type="text" name="usuario" class="form-control" placeholder="Usuário" required>
-                </div>
+            <input type="email" name="usuario" class="form-control" placeholder="Email" required>                </div>
                 <div class="form-group">
                     <div class="password-wrapper">
                         <input type="password" name="senha" id="senha" class="form-control" placeholder="Senha" required>
@@ -337,13 +340,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             
             <div class="signup-link">
-                Não possui uma conta? <a href="#">Cadastre-se</a>
+                Não possui uma conta? <a href="./cadastro.php">Cadastre-se</a>
             </div>
         </div>
         
         <div class="image-section">
             <div class="image-container">
-                <img src="./img/login.png" alt="Ilustração">
+                <img src="../img/login.png" alt="Ilustração">
             </div>
             <div class="image-text">
                 <h2>Acesse seu painel para gerenciar cursos e impulsionar o crescimento da equipe.</h2>

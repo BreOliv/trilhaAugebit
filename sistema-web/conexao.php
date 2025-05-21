@@ -1,6 +1,6 @@
-<?php 
+<?php
 
-//Configuração do Banco de Dados.
+// Configuração do Banco de Dados
 $usuario = 'root';
 $senha = '';
 $banco = 'trilha_augebit';
@@ -9,116 +9,60 @@ $servidor = 'localhost';
 date_default_timezone_set('America/Sao_Paulo');
 
 try {
-	$pdo = new PDO("mysql:dbname=$banco;host=$servidor;charset=utf8", "$usuario", "$senha");
+    $pdo = new PDO("mysql:dbname=$banco;host=$servidor;charset=utf8", "$usuario", "$senha");
 } catch (Exception $e) {
-	echo 'Erro ao conectar com o Banco de Dados!';
-	echo '<br>';
-	echo $e;
+    echo 'Erro ao conectar com o Banco de Dados!<br>';
+    echo $e->getMessage();
+    exit();
 }
 
-//Variáveis de Configuração do Sistema.
-$nome_sistema = 'Trilha Augebit ';
+// Variáveis de Configuração do Sistema
+$nome_sistema = 'Trilha Augebit';
 $email_sistema = 'admin@trilhaaugebit.com';
-$senha_sistema = '123';
-$nome_admin = '';
+$senha_sistema = '123'; // senha em texto simples
+$nome_admin = 'Administrador';
 
-// Verificar se as tabelas existem, caso contrário, criá-las
-$query = $pdo->query("SHOW TABLES LIKE 'cadastro_admin'");
-if($query->rowCount() == 0){
-    $pdo->query("
-    CREATE TABLE cadastro_admin (
+// Criar tabelas caso não existam
+$pdo->query("
+    CREATE TABLE IF NOT EXISTS cadastro_admin (
         id INT AUTO_INCREMENT PRIMARY KEY,
         nome_admin VARCHAR(100) NOT NULL,
         email VARCHAR(100) NOT NULL UNIQUE,
         sobrenome VARCHAR(100),
         genero VARCHAR(100),
-        senha INT(11)
-    )");
-}
+        senha VARCHAR(255) NOT NULL
+    )
+");
 
-$query = $pdo->query("SHOW TABLES LIKE 'login_admin'");
-if($query->rowCount() == 0){
-    $pdo->query("
-    CREATE TABLE login_admin (
+$pdo->query("
+    CREATE TABLE IF NOT EXISTS login_admin (
         id INT AUTO_INCREMENT PRIMARY KEY,
         email VARCHAR(100) NOT NULL UNIQUE,
-        senha INT(11) NOT NULL
-    )");
+        senha VARCHAR(255) NOT NULL
+    )
+");
+
+// Verificar se o admin já está cadastrado
+$stmt = $pdo->prepare("SELECT * FROM cadastro_admin WHERE email = ?");
+$stmt->execute([$email_sistema]);
+$resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Se não existir, insere o admin com a senha em texto simples
+if (!$resultado) {
+    $stmt = $pdo->prepare("INSERT INTO cadastro_admin (nome_admin, email, senha) VALUES (?, ?, ?)");
+    $stmt->execute([$nome_admin, $email_sistema, $senha_sistema]);
+
+    $stmt = $pdo->prepare("INSERT INTO login_admin (email, senha) VALUES (?, ?)");
+    $stmt->execute([$email_sistema, $senha_sistema]);
 }
 
-$query = $pdo->query("SHOW TABLES LIKE 'usuario_config'");
-if($query->rowCount() == 0){
-    $pdo->query("
-    CREATE TABLE usuario_config (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome_aluno VARCHAR(100) NOT NULL,
-        foto_perfil VARCHAR(255),
-        email VARCHAR(100) NOT NULL UNIQUE,
-        senha VARCHAR(100) NOT NULL
-    )");
-}
-    
-    // Inserir um usuário padrão para configuração inicial
-    $senha_padrao = 123;
-    $pdo->query("INSERT INTO cadastro_admin SET nome_admin = '$nome_admin', email = '$email_sistema', 
-    senha = '$senha_padrao'");
-
-$query = $pdo->query("SHOW TABLES LIKE 'cadastro_app'");
-if($query->rowCount() == 0){
-    $pdo->query("
-    CREATE TABLE cadastro_app (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome_aluno VARCHAR(100) NOT NULL,
-        email VARCHAR(100) NOT NULL UNIQUE,
-        senha VARCHAR(100) NOT NULL,
-        foto_perfil VARCHAR(255)
-    )");
-}
-
-$query = $pdo->query("SHOW TABLES LIKE 'cursos_app'");
-if($query->rowCount() == 0){
-    $pdo->query("
-    CREATE TABLE cursos_app (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome_curso VARCHAR(100) NOT NULL,
-        descricao TEXT,
-        modalidade ENUM('EAD', 'Presencial') NOT NULL,
-        unidade_local VARCHAR(100),
-        carga_horaria VARCHAR(50)
-    )");
-}
-
-$query = $pdo->query("SHOW TABLES LIKE 'inscricoes_app'");
-if($query->rowCount() == 0){
-    $pdo->query("
-    CREATE TABLE inscricoes_app (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        id_usuario INT NOT NULL,
-        id_curso INT NOT NULL,
-        status ENUM('andamento', 'concluído', 'pendente') DEFAULT 'pendente',
-        data_inscricao DATE DEFAULT CURRENT_DATE,
-        FOREIGN KEY (id_usuario) REFERENCES cadastro_app(id),
-        FOREIGN KEY (id_curso) REFERENCES cursos_app(id)
-    )");
-}
-
-$query = $pdo->query("SHOW TABLES LIKE 'filtro_app'");
-if($query->rowCount() == 0){
-    $pdo->query("
-    CREATE TABLE filtro_app (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        id_usuario INT NOT NULL,
-        filtro_curso ENUM('EAD', 'Presencial'),
-        FOREIGN KEY (id_usuario) REFERENCES cadastro_app(id)
-    )");
-}
-
-// / Carregar configurações do usuário se existirem
+// Carrega configurações do sistema a partir do primeiro admin cadastrado
 $query = $pdo->query("SELECT * FROM cadastro_admin LIMIT 1");
-$res = $query->fetchAll(PDO::FETCH_ASSOC);
-$total_reg = @count($res);
+$res = $query->fetch(PDO::FETCH_ASSOC);
 
-if($total_reg > 0){
-    $nome_admin = $res[0]['nome_admin'];
-    $email_sistema = $res[0]['email'];
+if ($res) {
+    $nome_admin = $res['nome_admin'];
+    $email_sistema = $res['email'];
 }
+
+?>

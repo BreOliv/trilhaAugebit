@@ -1,3 +1,12 @@
+
+
+
+
+
+
+
+
+
 <?php 
 
 //Inicia uma nova sessão ou retoma uma sessão existente.
@@ -21,10 +30,11 @@ $resultado = $query->fetchAll(PDO::FETCH_ASSOC);
 if(count($resultado) > 0) {
     // Define variáveis de sessão
     $_SESSION['id_usuario'] = $resultado[0]['id'];
-    $_SESSION['nome_usuario'] = $resultado[0]['nome'];
+    $_SESSION['nome_usuario'] = $resultado[0]['nome_admin'];
     $_SESSION['email_usuario'] = $resultado[0]['email'];
         
-    echo '<script>window.location="painel"</script>';
+    echo '<script>window.location="index.php"</script>';
+
 } else {
     // Se não encontrou como admin, tenta verificar se é um usuário normal
     $query = $pdo->prepare("SELECT * FROM usuario_config WHERE email = :email AND senha = :senha");

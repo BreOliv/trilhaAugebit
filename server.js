@@ -9,11 +9,11 @@ const PORT = 3000;
 const HOST = '10.136.23.91'; // IP específico
 
 // Serve a pasta "arquivos" como raiz do site
-app.use(express.static(path.join(__dirname, 'sistema-web')));
+app.use(express.static(path.join(__dirname, 'trilhaAugebit')));
 
 // Rota fallback para o index.html (opcional para SPAs ou fallback geral)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'sistema-web', 'index.html'));
+  res.sendFile(path.join(__dirname, 'trilhaAugebit', 'index.html'));
 });
 
 // Inicia o servidor no IP e porta especificados
