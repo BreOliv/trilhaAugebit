@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($user && $senha === $user['senha']) {
         $_SESSION['logado'] = true;
         $_SESSION['usuario'] = $usuario;
-        header("Location: dashboard.php"); // Redireciona após login
+        header("Location: ../index.php"); // Redireciona após login
         exit;
     } else {
         $loginError = "Usuário ou senha incorretos";
