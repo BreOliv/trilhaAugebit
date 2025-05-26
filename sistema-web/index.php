@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+$nome = $_SESSION['nome_usuario'] ?? 'Visitante';
+
 // Simulando dados do usuário
 $usuario = [
     'nome' => 'Nome Usu.',
@@ -28,7 +30,7 @@ $usuario = [
 // Função de logout
 if (isset($_GET['logout'])) {
     session_destroy();
-    header('Location: pages/login.php');
+    header('Location: login.php');
     exit;
 }
 
@@ -96,7 +98,7 @@ $mesAtual = date('M');
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: black;
             min-height: 100vh;
             display: flex;
         }
@@ -104,7 +106,7 @@ $mesAtual = date('M');
         /* Sidebar */
         .sidebar {
             width: 80px;
-            background: rgba(0, 0, 0, 0.8);
+            background: black;
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
@@ -116,7 +118,7 @@ $mesAtual = date('M');
         .logo {
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #4c6ef5, #9775fa);
             border-radius: 15px;
             display: flex;
             align-items: center;
@@ -157,9 +159,9 @@ $mesAtual = date('M');
         .main-content {
             flex: 1;
             padding: 30px;
-            background: rgba(255, 255, 255, 0.1);
+            background: #E3E3E3;
             backdrop-filter: blur(20px);
-            border-radius: 30px 0 0 30px;
+            border-radius: 30px 30px 30px 30px;
             margin: 20px 20px 20px 0;
         }
 
@@ -171,9 +173,9 @@ $mesAtual = date('M');
         }
 
         .header h1 {
-            color: white;
+            color: black;
             font-size: 32px;
-            font-weight: 300;
+            font-weight: 600;
         }
 
         .user-menu {
@@ -185,7 +187,7 @@ $mesAtual = date('M');
         .user-menu .icon {
             width: 45px;
             height: 45px;
-            background: rgba(255, 255, 255, 0.2);
+            background: #9999FF;
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -196,11 +198,11 @@ $mesAtual = date('M');
         }
 
         .user-menu .icon:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #4848D8;
         }
 
         .user-info {
-            background: rgba(255, 255, 255, 0.2);
+            background: #9999FF;
             padding: 10px 20px;
             border-radius: 25px;
             color: white;
@@ -213,9 +215,11 @@ $mesAtual = date('M');
         /* Dashboard Grid */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 30px;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
             height: calc(100vh - 200px);
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .left-section {
@@ -263,7 +267,7 @@ $mesAtual = date('M');
         }
 
         .progress-fill {
-            stroke: #667eea;
+            stroke: #4c6ef5;
             stroke-linecap: round;
             stroke-dasharray: 314;
             stroke-dashoffset: 78.5; /* 75% progress */
@@ -296,42 +300,49 @@ $mesAtual = date('M');
         .legend-dot {
             width: 12px;
             height: 12px;
-            background: #667eea;
+            background: #4c6ef5;
             border-radius: 50%;
         }
 
         /* Courses Section */
         .courses-section {
             flex: 1;
-            display: flex;
+            display: grid;
+            grid-template-columns: 200px 1fr 1fr;
             gap: 20px;
+            min-height: 300px;
+            overflow: hidden;
         }
 
         .add-course-card {
-            width: 200px;
             background: rgba(255, 255, 255, 0.1);
-            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border: 2px dashed black;
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            height: 300px;
+
         }
 
         .add-course-card:hover {
             background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
+            border-color: #9999FF;
         }
 
         .add-course-card i {
             font-size: 40px;
-            color: rgba(255, 255, 255, 0.6);
+            color: black;
+        }
+        .add-course-card i:hover {
+            font-size: 40px;
+            color: #9999FF;
         }
 
         .course-card {
-            flex: 1;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #4c6ef5, #9775fa);
             border-radius: 20px;
             padding: 25px;
             color: white;
@@ -339,6 +350,11 @@ $mesAtual = date('M');
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 300px;
+
         }
 
         .course-card:hover {
@@ -378,27 +394,31 @@ $mesAtual = date('M');
         }
 
         .course-card h3 {
-            font-size: 20px;
-            margin-bottom: 10px;
+            font-size: 18px;
+            margin-bottom: 8px;
             font-weight: 600;
+            line-height: 1.3;
         }
 
         .course-card p {
-            font-size: 14px;
+            font-size: 13px;
             opacity: 0.9;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .course-card.purple {
-            background: linear-gradient(135deg, #764ba2, #f093fb);
+            background: linear-gradient(135deg, #9775fa, #f06292);
+            height: 300px;
+
         }
 
         /* Calendar */
         .calendar-card {
             background: rgba(0, 0, 0, 0.8);
             border-radius: 20px;
-            padding: 20px;
+            padding: 15px;
             color: white;
+            max-height: 280px;
         }
 
         .calendar-header {
@@ -416,14 +436,16 @@ $mesAtual = date('M');
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            gap: 4px;
+            font-size: 12px;
+            justify-items: center;m
         }
 
         .calendar-day-header {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
-            padding: 8px 0;
+            padding: 6px 0;
             font-weight: 500;
         }
 
@@ -432,10 +454,11 @@ $mesAtual = date('M');
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 6px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
+            min-height: 28px;
         }
 
         .calendar-day:hover {
@@ -447,23 +470,25 @@ $mesAtual = date('M');
         }
 
         .calendar-day.today {
-            background: #667eea;
+            background: #4c6ef5;
             color: white;
             font-weight: 600;
         }
 
         .calendar-day.highlight {
-            background: rgba(102, 126, 234, 0.3);
+            background: rgba(76, 110, 245, 0.3);
             color: white;
-            border: 2px solid #667eea;
+            border: 2px solid #4c6ef5;
         }
 
         /* Chat Card */
         .chat-card {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: 20px;
+            padding: 15px;
             flex: 1;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         .chat-header {
@@ -481,7 +506,7 @@ $mesAtual = date('M');
         .chat-toggle {
             width: 50px;
             height: 25px;
-            background: #667eea;
+            background: #4c6ef5;
             border-radius: 25px;
             position: relative;
             cursor: pointer;
@@ -502,8 +527,8 @@ $mesAtual = date('M');
         .chat-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px 0;
+            gap: 10px;
+            padding: 10px 0;
             border-bottom: 1px solid #f3f4f6;
         }
 
@@ -512,16 +537,17 @@ $mesAtual = date('M');
         }
 
         .chat-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #4c6ef5, #9775fa);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
+            flex-shrink: 0;
         }
 
         .chat-info {
@@ -556,6 +582,20 @@ $mesAtual = date('M');
             font-size: 12px;
         }
 
+        @media (max-width: 1400px) {
+            .dashboard-grid {
+                grid-template-columns: 1.8fr 1fr;
+                gap: 20px;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .courses-section {
+                grid-template-columns: 180px 1fr 1fr;
+                gap: 15px;
+            }
+        }
+
         @media (max-width: 1200px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -563,12 +603,19 @@ $mesAtual = date('M');
             }
             
             .courses-section {
-                flex-direction: column;
+                grid-template-columns: 200px 1fr 1fr;
+                min-height: auto;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .courses-section {
+                grid-template-columns: 1fr;
+                gap: 15px;
             }
             
             .add-course-card {
-                width: 100%;
-                height: 150px;
+                height: 120px;
             }
         }
 
@@ -583,12 +630,14 @@ $mesAtual = date('M');
                 flex-direction: column;
                 text-align: center;
                 gap: 20px;
+                    height: 250px;
             }
             
             .header h1 {
                 font-size: 24px;
             }
         }
+        
     </style>
 </head>
 <body>
@@ -637,7 +686,7 @@ $mesAtual = date('M');
                 </div>
                 <div class="user-info">
                     <i class="fas fa-user"></i>
-                    <span><?php echo $usuario['nome']; ?></span>
+                    <span><?php echo htmlspecialchars($nome);?> </span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
             </div>
@@ -739,7 +788,7 @@ $mesAtual = date('M');
                     <?php endforeach; ?>
                     
                     <div style="text-align: center; margin-top: 15px;">
-                        <button style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;">
+                        <button style="background: #4c6ef5; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 14px;">
                             Responder com IA
                         </button>
                     </div>
@@ -769,7 +818,7 @@ $mesAtual = date('M');
         // Hover effects para os cards
         document.querySelectorAll('.course-card').forEach(card => {
             card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-10px) scale(1.02)';
+                this.style.transform = 'translateY(-1px) scale(0.97)';
             });
             
             card.addEventListener('mouseleave', function() {

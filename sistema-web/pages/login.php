@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $senha = $_POST['senha'] ?? '';
 
     // Verifica se o email existe na tabela login_admin
-    $stmt = $pdo->prepare("SELECT * FROM login_admin WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT * FROM cadastro_admin WHERE email = ?");
     $stmt->execute([$usuario]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -17,6 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($user && $senha === $user['senha']) {
         $_SESSION['logado'] = true;
         $_SESSION['usuario'] = $usuario;
+        $_SESSION['nome_usuario'] = $user['nome_admin'];
         header("Location: ../index.php"); // Redireciona após login
         exit;
     } else {
