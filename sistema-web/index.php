@@ -118,13 +118,16 @@ $mesAtual = date('M');
         .logo {
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #4c6ef5, #9775fa);
+            background: white;
             border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             font-size: 20px;
+        }
+        .logo2{
+         width: 45px;
+        height: 45px;   
         }
 
         .nav-item {
@@ -488,7 +491,23 @@ $mesAtual = date('M');
             padding: 15px;
             flex: 1;
             max-height: 400px;
-            overflow-y: auto;
+            overflow: auto; /* Evita cortar os cantos arredondados */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-card::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-card::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 20px;
+        }
+
+        .chat-card::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
         }
 
         .chat-header {
@@ -528,12 +547,10 @@ $mesAtual = date('M');
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .chat-item:last-child {
-            border-bottom: none;
+            background: #e0e7ff;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
         }
 
         .chat-avatar {
@@ -545,7 +562,7 @@ $mesAtual = date('M');
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 600;
             flex-shrink: 0;
         }
@@ -557,30 +574,55 @@ $mesAtual = date('M');
         .chat-info h4 {
             color: #1f2937;
             font-size: 14px;
-            margin-bottom: 2px;
+            margin: 0;
         }
 
         .chat-info p {
             color: #6b7280;
             font-size: 12px;
+            margin: 0;
+        }
+
+        .chat-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .chat-time {
-            color: #6b7280;
-            font-size: 12px;
+            color: #1f2937;
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .chat-status {
             width: 20px;
             height: 20px;
-            background: #10b981;
+            border: 2px solid #1f2937;
             border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             font-size: 12px;
+            color: #1f2937;
         }
+
+        .chat-button {
+            background: #4c6ef5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .chat-button:hover {
+            background: #3b5bdb;
+        }
+
 
         @media (max-width: 1400px) {
             .dashboard-grid {
@@ -639,12 +681,60 @@ $mesAtual = date('M');
         }
         
     </style>
+
+        <title>Gráfico de Rosca Simulado</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .body2 {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .chart-container {
+      position: relative;
+      width: 150px;
+      height: 150px;
+    }
+    .chart-container .percent {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: bold;
+      font-size: 24px;
+    }
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #7B61FF;
+    }
+  </style>
+
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <i class="fas fa-graduation-cap"></i>
+            <img class="logo2"  src="img/logo2.png" alt=""></img>
         </div>
         
         <div class="nav-item active">
@@ -697,7 +787,22 @@ $mesAtual = date('M');
             <!-- Left Section -->
             <div class="left-section">
                 <!-- Progress Card -->
-                <div class="progress-card">
+                 <div class="body 2">
+       <div class="card">
+    <div class="chart-container">
+      <canvas id="progressoChart"></canvas>
+      <div class="percent">75%</div>
+    </div>
+    <div class="legend">
+      <div class="dot"></div>
+      <div>
+        <strong>Progresso</strong> dos cursos<br>em geral
+      </div>
+    </div>
+  </div>
+  </div>
+
+                <!-- <div class="progress-card">
                     <div class="progress-circle">
                         <svg class="progress-ring">
                             <circle class="progress-bg" cx="60" cy="60" r="50"></circle>
@@ -711,7 +816,7 @@ $mesAtual = date('M');
                             <span>Progresso dos cursos em geral</span>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Courses Section -->
                 <div class="courses-section">
@@ -766,33 +871,36 @@ $mesAtual = date('M');
 
                 <!-- Chat de Dúvidas -->
                 <div class="chat-card">
-                    <div class="chat-header">
-                        <h3>Chat de dúvidas</h3>
-                        <div class="chat-toggle"></div>
-                    </div>
-                    
-                    <?php foreach ($usuario['chat_duvidas'] as $index => $chat): ?>
-                    <div class="chat-item">
-                        <div class="chat-avatar">
-                            <?php echo strtoupper(substr($chat['funcionario'], 0, 1)); ?>
-                        </div>
-                        <div class="chat-info">
-                            <h4><?php echo $chat['curso']; ?></h4>
-                            <p><?php echo $chat['funcionario']; ?></p>
-                        </div>
-                        <div class="chat-time"><?php echo $chat['hora']; ?></div>
-                        <div class="chat-status">
-                            <i class="fas fa-check"></i>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                    
-                    <div style="text-align: center; margin-top: 15px;">
-                        <button style="background: #4c6ef5; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 14px;">
-                            Responder com IA
-                        </button>
-                    </div>
+        <div class="chat-header">
+            <h3>Chat de dúvidas</h3>
+            <div class="chat-toggle"></div>
+        </div>
+
+        <?php foreach ($usuario['chat_duvidas'] as $index => $chat): ?>
+        <div class="chat-item">
+            <div class="chat-avatar">
+                <?php echo strtoupper(substr($chat['funcionario'], 0, 1)); ?>
+            </div>
+            <div class="chat-info">
+                <h4><?php echo $chat['curso']; ?></h4>
+                <p><?php echo $chat['funcionario']; ?></p>
+            </div>
+            <div class="chat-right">
+                <span class="chat-time"><?php echo $chat['hora']; ?></span>
+                <div class="chat-status">
+                    <i class="fas fa-check"></i>
                 </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+
+        <div style="text-align: center; margin-top: 15px;">
+            <button class="chat-button">
+                Responder com IA
+            </button>
+        </div>
+    </div>
+
             </div>
         </div>
     </div>
@@ -826,5 +934,30 @@ $mesAtual = date('M');
             });
         });
     </script>
+    <script>
+    const progresso = 75;
+    const restante = 100 - progresso;
+
+    new Chart(document.getElementById("progressoChart"), {
+      type: "doughnut",
+      data: {
+        labels: ["Concluído", "Restante"],
+        datasets: [{
+          data: [progresso, restante],
+          backgroundColor: ["#7B61FF", "#D6CEFF"],
+          borderWidth: 0,
+        }]
+      },
+      options: {
+        cutout: "80%",
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false }
+        }
+      }
+    });
+  </script>
+
 </body>
 </html>
