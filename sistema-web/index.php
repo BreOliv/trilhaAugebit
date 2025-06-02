@@ -490,8 +490,7 @@ $mesAtual = date('M');
             border-radius: 20px;
             padding: 15px;
             flex: 1;
-            max-height: 400px;
-            overflow: auto; /* Evita cortar os cantos arredondados */
+            max-height: 260px;
             display: flex;
             flex-direction: column;
         }
@@ -515,6 +514,7 @@ $mesAtual = date('M');
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            padding-top: 15px;
         }
 
         .chat-header h3 {
@@ -876,7 +876,8 @@ $mesAtual = date('M');
             <div class="chat-toggle"></div>
         </div>
 
-        <?php foreach ($usuario['chat_duvidas'] as $index => $chat): ?>
+        <?php foreach (array_slice($usuario['chat_duvidas'], 0, 2) as $index => $chat): ?>
+            
         <div class="chat-item">
             <div class="chat-avatar">
                 <?php echo strtoupper(substr($chat['funcionario'], 0, 1)); ?>
@@ -892,13 +893,9 @@ $mesAtual = date('M');
                 </div>
             </div>
         </div>
+        
         <?php endforeach; ?>
 
-        <div style="text-align: center; margin-top: 15px;">
-            <button class="chat-button">
-                Responder com IA
-            </button>
-        </div>
     </div>
 
             </div>
