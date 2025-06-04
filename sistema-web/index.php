@@ -742,7 +742,9 @@ $mesAtual = date('M');
         </div>
         
         <div class="nav-item">
+            <a href="pages/cursos.php" title="Cursos">
             <i class="fas fa-folder"></i>
+            </a>
         </div>
         
         <div class="nav-item">
