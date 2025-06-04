@@ -748,7 +748,9 @@ $mesAtual = date('M');
         </div>
         
         <div class="nav-item">
+             <a href="pages/grafico.php" title="Cursos">
             <i class="fas fa-chart-bar"></i>
+            </a>
         </div>
         
         <div class="nav-item">

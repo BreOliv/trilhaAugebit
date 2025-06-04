@@ -9,6 +9,20 @@ if (isset($_GET['logout'])) {
     header('Location: login.php');
     exit;
 }
+
+// Progresso de conclusão dos cursos
+$totalAlunos = 100;
+$concluidos = 72;
+$progresso = ($concluidos / $totalAlunos) * 100;
+
+// Cursos aplicados e quantidade de alunos
+$cursos = ['NR-10', 'NR-35', 'Espaço Confinado', 'Soldagem', 'Eletricista'];
+$quantidades = [25, 20, 18, 22, 15];
+
+// Desempenho por mês (simulado)
+$meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+$concluidosPorMes = [5, 8, 12, 15, 20, 12];
+
 ?>
 
 <!DOCTYPE html>
@@ -18,6 +32,7 @@ if (isset($_GET['logout'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trilha Augebit - Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         * {
@@ -161,11 +176,13 @@ if (isset($_GET['logout'])) {
     </a>
         </div>
         
-        <div class="nav-item active">
+        <div class="nav-item">
+            <a href="cursos.php" title="Cursos">
             <i class="fas fa-folder"></i>
+            </a>
         </div>
         
-        <div class="nav-item">
+        <div class="nav-item active">
             <i class="fas fa-chart-bar"></i>
         </div>
         
