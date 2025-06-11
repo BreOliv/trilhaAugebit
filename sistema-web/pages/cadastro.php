@@ -193,6 +193,11 @@ switch ($erro) {
             border: none;
             cursor: pointer;
             color: #6c63ff;
+            font-size: 18px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .terms {
@@ -368,9 +373,12 @@ switch ($erro) {
                 </div>
                 
                 <div class="form-group password-container">
-                    <input type="password" name="senha" id="senha" class="form-control" placeholder="Senha" required>
-                    <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
-                </div>
+                <input type="password" name="senha" id="senha" class="form-control" placeholder="Senha" required>
+                <button type="button" class="toggle-password" onclick="togglePassword()">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+
                 
                 <div class="terms">
                     <input type="checkbox" id="termos" name="termos" required>
@@ -387,15 +395,21 @@ switch ($erro) {
     </div>
 
     <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('senha');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-            } else {
-                passwordInput.type = 'password';
-            }
-        }
+       function togglePassword() {
+    const passwordInput = document.getElementById('senha');
+    const toggleBtn = document.querySelector('.toggle-password i');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.classList.remove('fa-eye');
+        toggleBtn.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleBtn.classList.remove('fa-eye-slash');
+        toggleBtn.classList.add('fa-eye');
+    }
+}
+
     </script>
 </body>
 </html>

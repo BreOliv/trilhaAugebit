@@ -18,6 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['logado'] = true;
         $_SESSION['usuario'] = $usuario;
         $_SESSION['nome_usuario'] = $user['nome_admin'];
+        $_SESSION['admin_id'] = $user['id'];
         header("Location: ../index.php"); // Redireciona após login
         exit;
     } else {
@@ -315,10 +316,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="password-wrapper">
                         <input type="password" name="senha" id="senha" class="form-control" placeholder="Senha" required>
                         <span toggle="#senha" class="toggle-password">
-                            <i class="far fa-eye"></i>
+                            <i class="fas fa-eye"></i>
                         </span>
                     </div>
-                </div>
+                </div> 
                 <div class="forgot-password">
                     <a href="#">Esqueci a senha</a>
                 </div>
@@ -357,19 +358,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Toggle password visibility
-            const togglePassword = document.querySelector('.toggle-password');
-            const password = document.querySelector('#senha');
-            
-            togglePassword.addEventListener('click', function() {
-                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-                password.setAttribute('type', type);
-                
-                // Toggle icon
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
-            });
-        });
+  const togglePassword = document.querySelector('.toggle-password');
+  const icons = togglePassword.querySelectorAll('i');
+  
+  // Remove todos os ícones extras (se houver mais de 1)
+  icons.forEach((icon, idx) => {
+    if (idx > 0) icon.remove();
+  });
+
+  const passwordInput = document.querySelector('#senha');
+  // Script de toggle reescrevendo o innerHTML
+  togglePassword.addEventListener('click', function() {
+    const isHidden = passwordInput.type === 'password';
+    passwordInput.type = isHidden ? 'text' : 'password';
+    this.innerHTML = isHidden
+      ? '<i class="fas fa-eye-slash"></i>'
+      : '<i class="fas fa-eye"></i>';
+  });
+});
+
     </script>
 </body>
 </html>

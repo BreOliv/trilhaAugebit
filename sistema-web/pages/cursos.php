@@ -186,7 +186,7 @@ if (isset($_GET['logout'])) {
     <div class="main-content">
         <!-- Header -->
         <div class="header">
-            <h1>Gráficos Augebit</h1>
+            <h1>Cursos Augebit</h1>
             <div class="user-menu">
                 <div class="icon">
                     <i class="fas fa-search"></i>

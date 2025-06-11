@@ -6,6 +6,14 @@ $nome = $_SESSION['nome_usuario'] ?? 'Visitante';
 // Simulando dados do usuário
 $usuario = [
     'nome' => 'Nome Usu.',
+    'participacao' => 60,
+    'frequencia_semana' => [
+    'seg' => 2,
+    'ter' => 3,
+    'qua' => 1,
+    'qui' => 4,
+    'sex' => 2
+],
     'progresso' => 75,
     'cursos' => [
         [
@@ -305,6 +313,10 @@ $mesAtual = date('M');
             height: 12px;
             background: #4c6ef5;
             border-radius: 50%;
+        }
+        .frequencia-chart {
+            width: 100%;
+            height: 600px;
         }
 
         /* Courses Section */
@@ -684,6 +696,8 @@ $mesAtual = date('M');
 
         <title>Gráfico de Rosca Simulado</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
   <style>
     .body2 {
       font-family: Arial, sans-serif;
@@ -701,6 +715,7 @@ $mesAtual = date('M');
       align-items: center;
       gap: 30px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      justify-content: center;
     }
     .chart-container {
       position: relative;
@@ -727,6 +742,7 @@ $mesAtual = date('M');
       border-radius: 50%;
       background: #7B61FF;
     }
+    
   </style>
 
 </head>
@@ -758,7 +774,9 @@ $mesAtual = date('M');
         </div>
         
         <div class="nav-item">
+         <a href="pages/usuario.php" title="Cursos">
             <i class="fas fa-user"></i>
+            </a>
         </div>
         
         <a href="pages/login.php" class="nav-item logout-btn" title="Logout">
@@ -790,6 +808,7 @@ $mesAtual = date('M');
         <div class="dashboard-grid">
             <!-- Left Section -->
             <div class="left-section">
+
                 <!-- Progress Card -->
                  <div class="body 2">
        <div class="card">
@@ -803,24 +822,21 @@ $mesAtual = date('M');
         <strong>Progresso</strong> dos cursos<br>em geral
       </div>
     </div>
+        <div class="chart-container frequencia-chart">
+      <canvas id="frequenciaSemanaChart" width="1500" height="1550"></canvas>
+    </div>
+    <div class="legend">
+      <div class="dot"></div>
+      <div>
+        <strong>Frequência </strong> de participação <br> por dia da semanal
+      </div>
+    </div>
+
   </div>
+  
   </div>
 
-                <!-- <div class="progress-card">
-                    <div class="progress-circle">
-                        <svg class="progress-ring">
-                            <circle class="progress-bg" cx="60" cy="60" r="50"></circle>
-                            <circle class="progress-fill" cx="60" cy="60" r="50"></circle>
-                        </svg>
-                        <div class="progress-text"><?php echo $usuario['progresso']; ?>%</div>
-                    </div>
-                    <div class="progress-info">
-                        <div class="progress-legend">
-                            <div class="legend-dot"></div>
-                            <span>Progresso dos cursos em geral</span>
-                        </div>
-                    </div>
-                </div> -->
+
 
                 <!-- Courses Section -->
                 <div class="courses-section">
@@ -934,18 +950,18 @@ $mesAtual = date('M');
                 this.style.transform = 'translateY(0) scale(1)';
             });
         });
-    </script>
-    <script>
-    const progresso = 75;
-    const restante = 100 - progresso;
+
+   // Progresso 1
+    const progresso1 = 75;
+    const restante1 = 100 - progresso1;
 
     new Chart(document.getElementById("progressoChart"), {
       type: "doughnut",
       data: {
         labels: ["Concluído", "Restante"],
         datasets: [{
-          data: [progresso, restante],
-          backgroundColor: ["#7B61FF", "#D6CEFF"],
+          data: [progresso1, restante1],
+          backgroundColor: ["#D6CEFF", "#7B61FF"],
           borderWidth: 0,
         }]
       },
@@ -958,6 +974,64 @@ $mesAtual = date('M');
         }
       }
     });
+
+// Gráfico de barras: Frequência na semana
+const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
+const frequencias = [
+  <?php echo $usuario['frequencia_semana']['seg']; ?>,
+  <?php echo $usuario['frequencia_semana']['ter']; ?>,
+  <?php echo $usuario['frequencia_semana']['qua']; ?>,
+  <?php echo $usuario['frequencia_semana']['qui']; ?>,
+  <?php echo $usuario['frequencia_semana']['sex']; ?>
+];
+
+new Chart(document.getElementById("frequenciaSemanaChart"), {
+  type: "bar",
+  data: {
+    labels: diasSemana,
+    datasets: [{
+      label: "Atividades",
+      data: frequencias,
+      backgroundColor: "#7B61FF",
+      borderRadius: 6,
+      barThickness: 18,
+      categoryPercentage: 0.6,
+      barPercentage: 0.7
+    }]
+  },
+  options: {
+    plugins: {
+      legend: { display: false },
+      datalabels: {
+        color: '#000',
+        anchor: 'end',
+        align: 'end',
+        font: {
+          weight: 'bold',
+          size: 12
+        },
+        formatter: (value) => value + '%'
+      }
+    },
+    scales: {
+      y: {
+        display: false
+      },
+      x: {
+        ticks: {
+          font: {
+            size: 10
+          }
+        },
+        grid: {
+          display: false
+        }
+      }
+    }
+  },
+  plugins: [ChartDataLabels] // <-- ATIVANDO o plugin aqui!
+});
+
   </script>
 
 </body>
