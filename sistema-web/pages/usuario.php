@@ -2,112 +2,89 @@
 session_start();
 require_once '../conexao.php';
 
+// Nome exibido no topo
 $nome = $_SESSION['nome_usuario'] ?? 'Visitante';
+$admin_id = $_SESSION['admin_id'] ?? null;
 
-// Função de logout
-if (isset($_GET['logout'])) {
-    session_destroy();
-    header('Location: login.php');
-    exit;
+if (!$admin_id) {
+    die('Administrador não identificado.');
 }
 
+// Mensagem de sucesso
+$mensagem = $_SESSION['mensagem_sucesso'] ?? '';
+$tipo_mensagem = $mensagem ? 'success' : '';
+unset($_SESSION['mensagem_sucesso']);
 
+// Buscar dados atuais
+$stmt = $pdo->prepare("SELECT * FROM cadastro_admin WHERE id = ?");
+$stmt->execute([$admin_id]);
+$admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$admin_id = $_SESSION['admin_id'];
-$mensagem = '';
-$tipo_mensagem = '';
+if (!$admin) {
+    die('Administrador não encontrado.');
+}
 
-// Processar formulário de atualização
-if ($_POST && isset($_POST['salvar_mudancas'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_mudancas'])) {
     $nome_admin = trim($_POST['nome_admin']);
     $sobrenome = trim($_POST['sobrenome']);
     $email = trim($_POST['email']);
-    $genero = $_POST['genero'];
+    $genero = $_POST['genero'] ?? '';
     $senha_atual = $_POST['senha_atual'] ?? '';
     $nova_senha = $_POST['nova_senha'] ?? '';
     $confirmar_senha = $_POST['confirmar_senha'] ?? '';
-    
+
     try {
-        // Validações básicas
         if (empty($nome_admin) || empty($sobrenome) || empty($email)) {
             throw new Exception("Nome, sobrenome e email são obrigatórios.");
         }
-        
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new Exception("Email inválido.");
         }
-        
-        // Verificar se email já existe para outro usuário
+
+        // Verifica se o e-mail já existe em outro admin
         $stmt = $pdo->prepare("SELECT id FROM cadastro_admin WHERE email = ? AND id != ?");
         $stmt->execute([$email, $admin_id]);
         if ($stmt->fetch()) {
-            throw new Exception("Este email já está sendo usado por outro administrador.");
+            throw new Exception("Este e-mail já está sendo usado por outro administrador.");
         }
-        
-        // Preparar dados para atualização
-        $dados_atualizacao = [
-            'nome_admin' => $nome_admin,
-            'sobrenome' => $sobrenome,
-            'email' => $email,
-            'genero' => $genero,
-            'id' => $admin_id
-        ];
-        
-        $sql = "UPDATE cadastro_admin SET nome_admin = ?, sobrenome = ?, email = ?, genero = ? WHERE id = ?";
-        
-        // Se uma nova senha foi fornecida
+
+        // SQL base
+        $sql = "UPDATE cadastro_admin SET nome_admin = ?, sobrenome = ?, email = ?, genero = ?";
+        $dados = [$nome_admin, $sobrenome, $email, $genero];
+
+        // Atualizar senha se solicitado
         if (!empty($nova_senha)) {
-            if (strlen($nova_senha) < 6) {
-                throw new Exception("A nova senha deve ter pelo menos 6 caracteres.");
-            }
-            
             if ($nova_senha !== $confirmar_senha) {
-                throw new Exception("A confirmação da senha não confere.");
+                throw new Exception("A confirmação da nova senha não confere.");
             }
-            
-            // Verificar senha atual se fornecida
-            if (!empty($senha_atual)) {
-                $stmt = $pdo->prepare("SELECT senha FROM cadastro_admin WHERE id = ?");
-                $stmt->execute([$admin_id]);
-                $admin = $stmt->fetch();
-                
-                if (!password_verify($senha_atual, $admin['senha'])) {
-                    throw new Exception("Senha atual incorreta.");
-                }
+
+            if ($senha_atual !== $admin['senha']) {
+                throw new Exception("Senha atual incorreta.");
             }
-            
-            $dados_atualizacao['senha'] = password_hash($nova_senha, PASSWORD_DEFAULT);
-            $sql = "UPDATE cadastro_admin SET nome_admin = ?, sobrenome = ?, email = ?, genero = ?, senha = ? WHERE id = ?";
-            $dados_atualizacao = array_values($dados_atualizacao);
-        } else {
-            $dados_atualizacao = array_values($dados_atualizacao);
+
+            $sql .= ", senha = ?";
+            $dados[] = $nova_senha;
         }
-        
+
+        $sql .= " WHERE id = ?";
+        $dados[] = $admin_id;
+
         $stmt = $pdo->prepare($sql);
-        $stmt->execute($dados_atualizacao);
-        
-        $mensagem = "Informações atualizadas com sucesso!";
-        $tipo_mensagem = "success";
-        
+        $stmt->execute($dados);
+
+        $_SESSION['nome_usuario'] = $nome_admin;
+        $nome = $nome_admin;
+
+        $_SESSION['mensagem_sucesso'] = "Informações atualizadas com sucesso!";
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
+
     } catch (Exception $e) {
         $mensagem = $e->getMessage();
-        $tipo_mensagem = "error";
+        $tipo_mensagem = 'error';
     }
 }
-
-// Buscar dados do administrador
-try {
-    $stmt = $pdo->prepare("SELECT * FROM cadastro_admin WHERE id = ?");
-    $stmt->execute([$admin_id]);
-    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if (!$admin) {
-        throw new Exception("Administrador não encontrado.");
-    }
-} catch (Exception $e) {
-    die("Erro ao buscar dados: " . $e->getMessage());
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -588,13 +565,13 @@ try {
                     
                     <div class="profile-actions">
                         <button class="profile-btn btn-primary">
-                            ℹ️ Informações Pessoal
+                           <i class="fa-solid fa-circle-info"></i> Informações Pessoal
                         </button>
                         <button class="profile-btn btn-secondary">
-                            🔒 Login e Senha
+                            <i class="fa-solid fa-lock"></i> Login e Senha
                         </button>
-                        <a href="logout.php" class="profile-btn btn-secondary">
-                            🚪 Sair
+                        <a href= "login.php" class="profile-btn btn-secondary">
+                            <i class="fa-solid fa-right-from-bracket"></i> Sair
                         </a>
                     </div>
                 </div>
@@ -661,11 +638,11 @@ try {
                         <!-- Seção de Senha -->
                         <div class="password-section">
                             <button type="button" class="collapse-btn" onclick="togglePasswordFields()">
-                                🔒 Alterar Senha (Opcional)
+                                <i class="fa-solid fa-lock"></i> Alterar Senha (Opcional)
                             </button>
                             <div class="password-fields" id="passwordFields">
                                 <div class="form-group">
-                                    <label class="form-label">Senha Atual (opcional)</label>
+                                    <label class="form-label">Senha Atual </label>
                                     <input type="password" name="senha_atual" class="form-input">
                                 </div>
                                 <div class="form-group">
@@ -694,53 +671,57 @@ try {
         </div>
     </div>
 
-
-
-    </div>
-
-
-    <script>
+     <script>
         function togglePasswordFields() {
             const fields = document.getElementById('passwordFields');
             const btn = document.querySelector('.collapse-btn');
-            
+
             if (fields.classList.contains('show')) {
                 fields.classList.remove('show');
-                btn.textContent = '🔒 Alterar Senha (Opcional)';
+                btn.innerHTML = '<i class="fa-solid fa-lock"></i> Alterar Senha (Opcional)';
             } else {
                 fields.classList.add('show');
-                btn.textContent = '🔒 Ocultar Campos de Senha';
+                btn.innerHTML = '<i class="fa-solid fa-lock"></i> Ocultar Campos de Senha';
             }
         }
 
-        // Validação do formulário
+        // Validação frontend
         document.querySelector('form').addEventListener('submit', function(e) {
             const novaSenha = document.querySelector('input[name="nova_senha"]').value;
             const confirmarSenha = document.querySelector('input[name="confirmar_senha"]').value;
-            
-            if (novaSenha && novaSenha !== confirmarSenha) {
-                alert('As senhas não conferem!');
-                e.preventDefault();
-                return false;
-            }
-            
-            if (novaSenha && novaSenha.length < 6) {
-                alert('A senha deve ter pelo menos 6 caracteres!');
-                e.preventDefault();
-                return false;
+            const senhaAtual = document.querySelector('input[name="senha_atual"]').value;
+
+            if (novaSenha) {
+                if (!senhaAtual) {
+                    alert('Por favor, preencha a senha atual para alterar a senha.');
+                    e.preventDefault();
+                    return false;
+                }
+
+                if (novaSenha.length < 6) {
+                    alert('A nova senha deve ter pelo menos 6 caracteres!');
+                    e.preventDefault();
+                    return false;
+                }
+
+                if (novaSenha !== confirmarSenha) {
+                    alert('As senhas não conferem!');
+                    e.preventDefault();
+                    return false;
+                }
             }
         });
 
-//Mensagem
+        // Mensagem flash some depois de 3 segundos
         document.addEventListener('DOMContentLoaded', function () {
-        const mensagem = document.getElementById('mensagem-flash');
-        if (mensagem) {
-            setTimeout(() => {
-                mensagem.style.opacity = '0'; // faz desaparecer suavemente
-                setTimeout(() => mensagem.remove(), 500); // remove do DOM
-            }, 3000); // espera 3 segundos antes de sumir
-        }
-    });
+            const mensagem = document.getElementById('mensagem-flash');
+            if (mensagem) {
+                setTimeout(() => {
+                    mensagem.style.opacity = '0';
+                    setTimeout(() => mensagem.remove(), 500);
+                }, 3000);
+            }
+        });
     </script>
 
-    </body>
+</body>

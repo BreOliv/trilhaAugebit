@@ -496,145 +496,221 @@ $mesAtual = date('M');
             border: 2px solid #4c6ef5;
         }
 
-        /* Chat Card */
-        .chat-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 15px;
-            flex: 1;
-            max-height: 260px;
-            display: flex;
-            flex-direction: column;
-        }
+        /* Chat de Dúvidas */
 
-        .chat-card::-webkit-scrollbar {
-            width: 8px;
-        }
+    /* Chat Card */
+.chat-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 15px;
+    flex: 1;
+    max-height: 260px;
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    overflow-y: auto;
+}
 
-        .chat-card::-webkit-scrollbar-track {
-            background: transparent;
-            border-radius: 20px;
-        }
+.chat-card::-webkit-scrollbar {
+    width: 8px;
+}
 
-        .chat-card::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
+.chat-card::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 20px;
+}
 
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-top: 15px;
-        }
+.chat-card::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
 
-        .chat-header h3 {
-            color: #1f2937;
-            font-size: 18px;
-        }
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-top: 15px;
+}
 
-        .chat-toggle {
-            width: 50px;
-            height: 25px;
-            background: #4c6ef5;
-            border-radius: 25px;
-            position: relative;
-            cursor: pointer;
-        }
+.chat-header h3 {
+    color: #1f2937;
+    font-size: 18px;
+}
 
-        .chat-toggle::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 21px;
-            height: 21px;
-            background: white;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
+.chat-toggle {
+    width: 50px;
+    height: 25px;
+    background: #ccc;
+    border-radius: 25px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-        .chat-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #e0e7ff;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-        }
+.chat-toggle.active {
+    background: #4c6ef5;
+}
 
-        .chat-avatar {
-            width: 35px;
-            height: 35px;
-            background: linear-gradient(135deg, #4c6ef5, #9775fa);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
+.chat-toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 21px;
+    height: 21px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
 
-        .chat-info {
-            flex: 1;
-        }
+.chat-toggle.active::after {
+    transform: translateX(25px);
+}
 
-        .chat-info h4 {
-            color: #1f2937;
-            font-size: 14px;
-            margin: 0;
-        }
+.chat-content {
+    transition: all 0.3s ease;
+    opacity: 1;
+}
 
-        .chat-info p {
-            color: #6b7280;
-            font-size: 12px;
-            margin: 0;
-        }
+.chat-content.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
 
-        .chat-right {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+.chat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #e0e7ff;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-        .chat-time {
-            color: #1f2937;
-            font-size: 13px;
-            font-weight: 500;
-        }
+.chat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
-        .chat-status {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #1f2937;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: #1f2937;
-        }
+.chat-avatar {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, #4c6ef5, #9775fa);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
 
-        .chat-button {
-            background: #4c6ef5;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: background 0.3s ease;
-        }
+.chat-info {
+    flex: 1;
+}
 
-        .chat-button:hover {
-            background: #3b5bdb;
-        }
+.chat-info h4 {
+    color: #1f2937;
+    font-size: 14px;
+    margin: 0;
+}
 
+.chat-info p {
+    color: #6b7280;
+    font-size: 12px;
+    margin: 0;
+}
+
+.chat-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chat-time {
+    color: #1f2937;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.chat-status {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #1f2937;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #1f2937;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chat-status.checked {
+    background: #4CAF50;
+    border-color: #4CAF50;
+    color: white;
+}
+
+/* NOTIFICAÇÃO COM ANIMAÇÃO FADE + SLIDE */
+
+.ai-status-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    max-width: 300px;
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+    transition: all 0.5s ease;
+}
+
+.ai-status-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.ai-status-notification.ai-enabled {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+}
+
+.ai-status-notification.ai-disabled {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+}
+
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification-content i {
+    font-size: 16px;
+}
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
 
         @media (max-width: 1400px) {
             .dashboard-grid {
@@ -890,33 +966,50 @@ $mesAtual = date('M');
                 </div>
 
                 <!-- Chat de Dúvidas -->
-                <div class="chat-card">
+  <div class="chat-card">
         <div class="chat-header">
             <h3>Chat de dúvidas</h3>
-            <div class="chat-toggle"></div>
+            <div class="chat-toggle" id="chatToggle"></div>
         </div>
 
-        <?php foreach (array_slice($usuario['chat_duvidas'], 0, 2) as $index => $chat): ?>
-            
-        <div class="chat-item">
-            <div class="chat-avatar">
-                <?php echo strtoupper(substr($chat['funcionario'], 0, 1)); ?>
+        <div class="chat-content" id="chatContent">
+            <div class="chat-item" data-id="1">
+                <div class="chat-avatar">N</div>
+                <div class="chat-info">
+                    <h4>Nome do curso</h4>
+                    <p>Nome do funcionário</p>
+                </div>
+                <div class="chat-right">
+                    <span class="chat-time">21:55</span>
+                    <div class="chat-status">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
             </div>
-            <div class="chat-info">
-                <h4><?php echo $chat['curso']; ?></h4>
-                <p><?php echo $chat['funcionario']; ?></p>
-            </div>
-            <div class="chat-right">
-                <span class="chat-time"><?php echo $chat['hora']; ?></span>
-                <div class="chat-status">
-                    <i class="fas fa-check"></i>
+
+            <div class="chat-item" data-id="2">
+                <div class="chat-avatar">M</div>
+                <div class="chat-info">
+                    <h4>Matemática Básica</h4>
+                    <p>Maria Silva</p>
+                </div>
+                <div class="chat-right">
+                    <span class="chat-time">20:30</span>
+                    <div class="chat-status">
+                        <i class="fas fa-check"></i>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <?php endforeach; ?>
-
     </div>
+     <!-- Notificação de status da IA -->
+    <div class="ai-status-notification" id="aiStatusNotification">
+        <div class="notification-content">
+            <i class="fas fa-robot"></i>
+            <span id="aiStatusText">Está sendo respondido com IA</span>
+        </div>
+    </div>
+
 
             </div>
         </div>
@@ -935,21 +1028,132 @@ $mesAtual = date('M');
             }, 500);
         });
 
-        // Toggle do chat
-        document.querySelector('.chat-toggle').addEventListener('click', function() {
-            this.classList.toggle('active');
-        });
+ // CHAT função
+    class ChatDuvidas {
+        constructor() {
+            this.isAIEnabled = true; // IA ativada por padrão
+            this.init();
+        }
 
-        // Hover effects para os cards
-        document.querySelectorAll('.course-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-1px) scale(0.97)';
+        init() {
+            this.bindEvents();
+            this.updateToggleState();
+        }
+
+        bindEvents() {
+            // Toggle do chat - agora controla IA
+            const toggle = document.getElementById('chatToggle');
+            if (toggle) {
+                toggle.addEventListener('click', () => {
+                    this.toggleAI();
+                });
+            }
+
+            // Clique nos itens do chat - redireciona para página de conversa
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (!e.target.closest('.chat-status')) {
+                        this.openConversation(item);
+                    }
+                });
             });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
+
+            // Checkbox dos status
+            document.querySelectorAll('.chat-status').forEach(status => {
+                status.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleStatus(status);
+                });
             });
-        });
+        }
+
+        toggleAI() {
+            this.isAIEnabled = !this.isAIEnabled;
+            this.updateToggleState();
+            this.showAIStatusNotification();
+            this.updateAIStatusInDatabase();
+        }
+
+        updateToggleState() {
+            const toggle = document.getElementById('chatToggle');
+            const content = document.getElementById('chatContent');
+
+            if (this.isAIEnabled) {
+                toggle.classList.add('active');
+                content.classList.remove('disabled');
+            } else {
+                toggle.classList.remove('active');
+                content.classList.add('disabled');
+            }
+        }
+
+        showAIStatusNotification() {
+            const notification = document.getElementById('aiStatusNotification');
+            const statusText = document.getElementById('aiStatusText');
+
+            // Remove estados anteriores
+            notification.classList.remove('ai-enabled', 'ai-disabled', 'show');
+
+            // Atualiza cor e texto
+            if (this.isAIEnabled) {
+                notification.classList.add('ai-enabled');
+                statusText.textContent = 'Está sendo respondido com IA';
+            } else {
+                notification.classList.add('ai-disabled');
+                statusText.textContent = 'Não está sendo respondido com IA';
+            }
+
+            // Força reflow pra garantir animação repetida
+            void notification.offsetWidth;
+
+            // Exibe
+            notification.classList.add('show');
+
+            // Remove depois de 3 segundos
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        openConversation(item) {
+            const chatId = item.dataset.id;
+            const funcionario = item.querySelector('.chat-info p').textContent;
+            const curso = item.querySelector('.chat-info h4').textContent;
+
+            const conversationUrl = `conversa.php?chat_id=${chatId}&funcionario=${encodeURIComponent(funcionario)}&curso=${encodeURIComponent(curso)}`;
+
+            console.log(`Redirecionando para: ${conversationUrl}`);
+            // window.location.href = conversationUrl;
+
+            alert(`Redirecionando para conversa:\nFuncionário: ${funcionario}\nCurso: ${curso}\nIA Ativada: ${this.isAIEnabled ? 'Sim' : 'Não'}`);
+        }
+
+        toggleStatus(statusElement) {
+            const chatItem = statusElement.closest('.chat-item');
+            const chatId = chatItem.dataset.id;
+
+            statusElement.classList.toggle('checked');
+
+            // Atualiza no banco (exemplo: pode fazer um fetch/ajax futuramente)
+            this.updateMessageStatus(chatId, statusElement.classList.contains('checked'));
+        }
+
+        updateAIStatusInDatabase() {
+            console.log(`Atualizando status da IA no banco... IA Ativada: ${this.isAIEnabled}`);
+            // Aqui você faz o Ajax/fetch pra salvar no backend
+        }
+
+        updateMessageStatus(chatId, isChecked) {
+            console.log(`Atualizando status da mensagem ${chatId} para ${isChecked ? 'Lido' : 'Não lido'}`);
+            // Aqui também vai seu código de backend
+        }
+    }
+
+    // Instancia a classe (importantíssimo)
+    document.addEventListener('DOMContentLoaded', () => {
+        new ChatDuvidas();
+    });
+
 
    // Progresso 1
     const progresso1 = 75;
