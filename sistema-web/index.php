@@ -330,30 +330,20 @@ $mesAtual = date('M');
         }
 
         .add-course-card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px dashed black;
-            border-radius: 20px;
+             border: 2px dashed #d1d5db;
+            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            height: 300px;
+            color: #9ca3af;
+            font-size: 48px;
+            border-radius: 20px;
 
         }
 
         .add-course-card:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #9999FF;
-        }
-
-        .add-course-card i {
-            font-size: 40px;
-            color: black;
-        }
-        .add-course-card i:hover {
-            font-size: 40px;
-            color: #9999FF;
+           border-color: #4c63d2;
+            color: #4c63d2;
         }
 
         .course-card {
@@ -917,7 +907,7 @@ $mesAtual = date('M');
                 <!-- Courses Section -->
                 <div class="courses-section">
                     <div class="add-course-card">
-                        <i class="fas fa-plus"></i>
+                        +
                     </div>
                     
                     <?php foreach ($usuario['cursos'] as $index => $curso): ?>
