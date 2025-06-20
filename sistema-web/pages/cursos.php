@@ -869,9 +869,6 @@ try {
       </div>
     </div>
   </div>
-</form>
-
-
 
             <div class="form-grid">
                 <div class="form-group">
