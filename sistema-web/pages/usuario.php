@@ -507,33 +507,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_mudancas'])) {
             <img class="logo2"  src="../img/logo2.png" alt=""></img>
         </div>
         
-        <div class="nav-item">
-            <a href="../index.php" title="Cursos">
-            <i class="fas fa-th-large"></i>
-    </a>
-        </div>
-        
         <div class="nav-item active">
+         <a href="../index.php" title="Cursos">
+            <i class="fas fa-th-large"></i>
+        </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="cursos.php" title="Cursos">
             <i class="fas fa-folder"></i>
+            </a>
         </div>
         
         <div class="nav-item">
+             <a href="grafico.php" title="Cursos">
             <i class="fas fa-chart-bar"></i>
+            </a>
         </div>
         
         <div class="nav-item">
+                     <a href="chat.php" title="Cursos">
             <i class="fas fa-file-alt"></i>
+        </a>
         </div>
         
         <div class="nav-item">
+         <a href="usuario.php" title="Cursos">
             <i class="fas fa-user"></i>
+            </a>
         </div>
         
-        <a href="pages/login.php" class="nav-item logout-btn" title="Logout">
+        <a href="login.php" class="nav-item logout-btn" title="Logout">
             <i class="fas fa-sign-out-alt"></i>
         </a>
     </div>
-
+    
     <!-- Main Content -->
     <div class="main-content">
         <!-- Header -->

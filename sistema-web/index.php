@@ -820,7 +820,9 @@ $mesAtual = date('M');
         </div>
         
         <div class="nav-item active">
+         <a href="index.php" title="Cursos">
             <i class="fas fa-th-large"></i>
+        </a>
         </div>
         
         <div class="nav-item">
@@ -836,7 +838,9 @@ $mesAtual = date('M');
         </div>
         
         <div class="nav-item">
+                     <a href="pages/chat.php" title="Cursos">
             <i class="fas fa-file-alt"></i>
+        </a>
         </div>
         
         <div class="nav-item">

@@ -11,8 +11,11 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-// Processar o formulário de criação do curso
+$mensagem = '';
+$tipo_mensagem = '';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Coletando os dados do formulário
     $nome_curso = $_POST['courseName'] ?? '';
     $subtitulo = $_POST['subtitle'] ?? '';
     $tempo = $_POST['duration'] ?? '';
@@ -21,45 +24,62 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $data_limite = $_POST['deadline'] ?? null;
     $descricao = $_POST['description'] ?? '';
 
-    // Variável para armazenar o nome da imagem
-    $nome_imagem = null;
+    $nome_imagem = "";
 
-    // Verificar se o arquivo de imagem foi enviado e não houve erro
+    // Upload da imagem
     if (isset($_FILES['img_curso']) && $_FILES['img_curso']['error'] === UPLOAD_ERR_OK) {
         $arquivoTmp = $_FILES['img_curso']['tmp_name'];
         $nomeOriginal = $_FILES['img_curso']['name'];
         $extensao = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
 
-        // Validar extensão se quiser (ex: jpg, png)
         $extPermitidas = ['jpg', 'jpeg', 'png', 'gif'];
         if (in_array($extensao, $extPermitidas)) {
-            // Criar nome único para evitar sobrescrever arquivos
             $nome_imagem = uniqid('curso_') . '.' . $extensao;
             $destino = '../uploads/' . $nome_imagem;
 
+            // Salvar fisicamente
+            if (!move_uploaded_file($arquivoTmp, $destino)) {
+                $_SESSION['mensagem'] = "Erro ao salvar a imagem.";
+                $_SESSION['tipo_mensagem'] = "error";
+                $_SESSION['abrir_modal'] = true;
+                header("Location: cursos.php");
+                exit;
+            }
+        } else {
+            $_SESSION['mensagem'] = "Formato de imagem não permitido. Envie jpg, jpeg, png ou gif.";
+            $_SESSION['tipo_mensagem'] = "error";
+            $_SESSION['abrir_modal'] = true;
+            header("Location: cursos.php");
+            exit;
         }
     }
 
     try {
-        // Inserir no banco, incluindo o nome da imagem (que pode ser NULL)
         $stmt = $pdo->prepare("INSERT INTO cursos_web (nome_curso, subtitulo, tempo, modalidade, local, data_limite, descricao, img_curso, criado_em) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
         $stmt->execute([$nome_curso, $subtitulo, $tempo, $modalidade, $local, $data_limite, $descricao, $nome_imagem]);
 
-        echo "<script>alert('Curso criado com sucesso!'); window.location.href='cursos.php';</script>";
+        $_SESSION['mensagem'] = "Curso criado com sucesso!";
+        $_SESSION['tipo_mensagem'] = "success";
+        header("Location: cursos.php");
         exit;
     } catch (PDOException $e) {
-        echo "Erro ao salvar o curso: " . $e->getMessage();
+        $_SESSION['mensagem'] = "Erro ao salvar o curso: " . $e->getMessage();
+        $_SESSION['tipo_mensagem'] = "error";
+        $_SESSION['abrir_modal'] = true;
+        header("Location: cursos.php");
+        exit;
     }
 }
 
-// Buscar os cursos mais recentes
+// Busca dos cursos recentes (exemplo para a sua seção de "Criados recentemente")
 try {
     $stmt = $pdo->query("SELECT * FROM cursos_web ORDER BY criado_em DESC LIMIT 5");
     $recentCourses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    echo "Erro ao buscar cursos: " . $e->getMessage();
     $recentCourses = [];
 }
+
+
 ?>
 
 
@@ -665,29 +685,37 @@ try {
             <img class="logo2"  src="../img/logo2.png" alt=""></img>
         </div>
         
-        <div class="nav-item">
-            <a href="../index.php" title="Cursos">
-            <i class="fas fa-th-large"></i>
-    </a>
-        </div>
-        
         <div class="nav-item active">
+         <a href="../index.php" title="Cursos">
+            <i class="fas fa-th-large"></i>
+        </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="cursos.php" title="Cursos">
             <i class="fas fa-folder"></i>
+            </a>
         </div>
         
         <div class="nav-item">
+             <a href="grafico.php" title="Cursos">
             <i class="fas fa-chart-bar"></i>
+            </a>
         </div>
         
         <div class="nav-item">
+                     <a href="chat.php" title="Cursos">
             <i class="fas fa-file-alt"></i>
+        </a>
         </div>
         
         <div class="nav-item">
+         <a href="usuario.php" title="Cursos">
             <i class="fas fa-user"></i>
+            </a>
         </div>
         
-        <a href="pages/login.php" class="nav-item logout-btn" title="Logout">
+        <a href="login.php" class="nav-item logout-btn" title="Logout">
             <i class="fas fa-sign-out-alt"></i>
         </a>
     </div>
@@ -768,6 +796,14 @@ try {
 
                 <div class="course-card add">+</div>
             </div>
+
+            <?php if (isset($_SESSION['mensagem'])): ?>
+            <div class="alert <?= ($_SESSION['tipo_mensagem'] == 'success') ? 'alert-success' : 'alert-error' ?>">
+                <?= $_SESSION['mensagem'] ?>
+            </div>
+            <?php unset($_SESSION['mensagem'], $_SESSION['tipo_mensagem']); ?>
+        <?php endif; ?>
+
 
      <!-- Seção Criados Recentemente -->
             <div class="recent-section">
