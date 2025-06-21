@@ -11,6 +11,59 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
+// Definir usuário da sessão (em um sistema real, isso viria do login)
+if (!isset($_SESSION['usuario'])) {
+    $_SESSION['usuario'] = 'Fernanda Dias'; // Usuário padrão
+}
+
+$database = new Database();
+$db = $database->getConnection();
+
+// Processar envio de mensagem
+if ($_POST['action'] ?? '' === 'send_message') {
+    $usuario = $_SESSION['usuario'];
+    $mensagem = trim($_POST['mensagem'] ?? '');
+    
+    if (!empty($mensagem)) {
+        $query = "INSERT INTO mensagens (usuario, mensagem, data_envio) VALUES (:usuario, :mensagem, NOW())";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':usuario', $usuario);
+        $stmt->bindParam(':mensagem', $mensagem);
+        $stmt->execute();
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'success']);
+    exit;
+}
+
+// Buscar mensagens
+if ($_GET['action'] ?? '' === 'get_messages') {
+    $query = "SELECT * FROM mensagens ORDER BY data_envio DESC LIMIT 50";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $mensagens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    header('Content-Type: application/json');
+    echo json_encode(array_reverse($mensagens));
+    exit;
+}
+
+// Buscar conversas (usuários únicos)
+if ($_GET['action'] ?? '' === 'get_conversations') {
+    $query = "SELECT DISTINCT usuario, MAX(data_envio) as ultima_mensagem 
+              FROM mensagens 
+              GROUP BY usuario 
+              ORDER BY ultima_mensagem DESC";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $conversas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    header('Content-Type: application/json');
+    echo json_encode($conversas);
+    exit;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -209,6 +262,11 @@ if (isset($_GET['logout'])) {
                     <i class="fas fa-chevron-down"></i>
                 </div>
             </div>
+
+        
+
         </div>
+
+
 
 </body>
