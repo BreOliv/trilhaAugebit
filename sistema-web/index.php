@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once 'conexao.php';
+
 
 $nome = $_SESSION['nome_usuario'] ?? 'Visitante';
 
@@ -88,6 +90,74 @@ function gerarCalendario() {
 
 $calendario = gerarCalendario();
 $mesAtual = date('M');
+
+//MODAL
+$mensagem = '';
+$tipo_mensagem = '';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $acao = $_POST['acao'] ?? '';
+
+    if ($acao == 'criar_curso') {
+        $nome_curso = $_POST['courseName'] ?? '';
+        $subtitulo = $_POST['subtitle'] ?? '';
+        $tempo = $_POST['duration'] ?? '';
+        $modalidade = $_POST['modality'] ?? '';
+        $local = $_POST['location'] ?? '';
+        $data_limite = $_POST['deadline'] ?? null;
+        $descricao = $_POST['description'] ?? '';
+        $nome_imagem = '';
+
+        if (isset($_FILES['img_curso']) && $_FILES['img_curso']['error'] === UPLOAD_ERR_OK) {
+            $arquivoTmp = $_FILES['img_curso']['tmp_name'];
+            $nomeOriginal = $_FILES['img_curso']['name'];
+            $extensao = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
+
+            $extPermitidas = ['jpg', 'jpeg', 'png', 'gif'];
+            if (in_array($extensao, $extPermitidas)) {
+                $nome_imagem = uniqid('curso_') . '.' . $extensao;
+                $destino = '../uploads/' . $nome_imagem;
+
+                if (!move_uploaded_file($arquivoTmp, $destino)) {
+                    $_SESSION['mensagem'] = "Erro ao salvar a imagem.";
+                    $_SESSION['tipo_mensagem'] = "error";
+                    $_SESSION['abrir_modal'] = true;
+                    header("Location: dashboard.php");
+                    exit;
+                }
+            } else {
+                $_SESSION['mensagem'] = "Formato de imagem não permitido.";
+                $_SESSION['tipo_mensagem'] = "error";
+                $_SESSION['abrir_modal'] = true;
+                header("Location: index.php");
+                exit;
+            }
+        }
+
+        try {
+            $stmt = $pdo->prepare("INSERT INTO cursos_web (nome_curso, subtitulo, tempo, modalidade, local, data_limite, descricao, img_curso, criado_em) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+            $stmt->execute([$nome_curso, $subtitulo, $tempo, $modalidade, $local, $data_limite, $descricao, $nome_imagem]);
+
+            $_SESSION['mensagem'] = "Curso criado com sucesso!";
+            $_SESSION['tipo_mensagem'] = "success";
+        } catch (PDOException $e) {
+            $_SESSION['mensagem'] = "Erro ao salvar o curso: " . $e->getMessage();
+            $_SESSION['tipo_mensagem'] = "error";
+            $_SESSION['abrir_modal'] = true;
+        }
+
+        header("Location: index.php");
+        exit;
+    }
+}
+
+// === CARREGAR OS CURSOS PARA O ATALHO ===
+$stmt = $pdo->query("SELECT nome_curso AS nome, subtitulo AS descricao FROM cursos_web ORDER BY criado_em DESC LIMIT 2");
+$usuario['cursos'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Para a lista de recentes
+$stmt = $pdo->query("SELECT * FROM cursos_web ORDER BY criado_em DESC LIMIT 10");
+$cursos_recentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -110,6 +180,12 @@ $mesAtual = date('M');
             min-height: 100vh;
             display: flex;
         }
+        a {
+            
+        color: white;
+        text-decoration: none;
+        }
+
 
         /* Sidebar */
         .sidebar {
@@ -330,7 +406,7 @@ $mesAtual = date('M');
         }
 
         .add-course-card {
-             border: 2px dashed #d1d5db;
+            border: 2px dashed #d1d5db;
             background: transparent;
             display: flex;
             align-items: center;
@@ -338,13 +414,21 @@ $mesAtual = date('M');
             color: #9ca3af;
             font-size: 48px;
             border-radius: 20px;
-
+            height: 300px;
         }
-
-        .add-course-card:hover {
-           border-color: #4c63d2;
+                .add-course-card:hover {
+            border-color: #4c63d2;
             color: #4c63d2;
         }
+        
+        button.create-btn {
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        appearance: none; /* Remove estilos nativos em alguns navegadores */
+    }
 
         .course-card {
             background: linear-gradient(135deg, #4c6ef5, #9775fa);
@@ -362,9 +446,6 @@ $mesAtual = date('M');
 
         }
 
-        .course-card:hover {
-            transform: translateY(-5px);
-        }
 
         .course-card::before {
             content: '';
@@ -757,8 +838,255 @@ $mesAtual = date('M');
                 font-size: 24px;
             }
         }
-        
-    </style>
+
+                /* Modal */
+        .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                padding-top: 80px;
+                z-index: 1000;
+            }
+
+            .modal-overlay.modal-visible {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .modal-container {
+                background: white;
+                border-radius: 16px;
+                width: 90%;
+                max-width: 1000px;
+                padding: 24px;
+                position: relative;
+                transform: translateY(30px);
+                transition: transform 0.3s ease;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                 max-height: 80vh; /* Modal no máximo 80% da altura da tela */
+                overflow-y: auto;
+                  scrollbar-width: none; /* Firefox */
+                 -ms-overflow-style: none; /* IE antigo */
+            }
+            .modal-container::-webkit-scrollbar {
+                width: 0px;
+                background: transparent;
+            }
+
+            .modal-overlay.modal-visible .modal-container {
+                transform: translateY(0);
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+            }
+
+            .modal-title {
+                font-size: 20px;
+                font-weight: 600;
+                color: #333;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .edit-icon {
+                color: #667eea;
+                cursor: pointer;
+            }
+
+            .close-btn {
+                background: none;
+                border: none;
+                font-size: 24px;
+                color: #999;
+                cursor: pointer;
+                padding: 4px;
+                border-radius: 4px;
+                transition: color 0.2s ease;
+            }
+
+            .close-btn:hover {
+                color: #666;
+            }
+
+            .modal-content {
+                display: grid;
+                gap: 20px;
+            }
+
+            .upload-area {
+                grid-column: 1 / -1; /* Faz ela pegar todas as colunas do grid */
+                margin: 0 auto;      /* Centraliza horizontalmente */
+                width: 900px;   /* Largura máxima do quadrado */
+                height: 200px;       /* Altura fixa do quadrado */
+                border: 2px dashed #667eea;
+                border-radius: 12px;
+                padding: 40px 20px;
+                text-align: center;
+                background: #f8f9ff;
+                margin-bottom: 20px;
+                overflow: hidden;
+            }
+
+            .upload-icon {
+                margin-bottom: 12px;
+                color: #667eea;
+            }
+
+            .upload-btn {
+                background: #667eea;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 500;
+                transition: background 0.2s ease;
+            }
+
+            .upload-btn:hover {
+                background: #5a67d8;
+            }
+
+            .image-preview {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 150px;
+                }
+
+        .image-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 8px;
+        }
+
+            .image-actions{
+                padding: 10px;
+            }
+
+            .form-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .form-group.full-width {
+                grid-column: 1 / -1;
+            }
+
+            .form-label {
+                font-size: 14px;
+                font-weight: 600;
+                color: #333;
+            }
+
+            .required {
+                color: #e53e3e;
+            }
+
+            .form-input, .form-select, .form-textarea {
+                padding: 12px;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: border-color 0.2s ease;
+            }
+
+            .form-input:focus, .form-select:focus, .form-textarea:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .form-textarea {
+                min-height: 80px;
+                resize: vertical;
+            }
+
+            .form-actions {
+                display: flex;
+                gap: 12px;
+                justify-content: flex-end;
+                margin-top: 24px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                border: none;
+                font-size: 14px;
+            }
+
+            .btn-secondary {
+                background: #f7fafc;
+                color: #4a5568;
+                border: 1px solid #e2e8f0;
+            }
+
+            .btn-secondary:hover {
+                background: #edf2f7;
+            }
+
+            .btn-primary {
+                background: #667eea;
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background: #5a67d8;
+            }
+
+            .demo-trigger {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                background: #667eea;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+            }
+
+            @media (max-width: 640px) {
+                .form-grid {
+                    grid-template-columns: 1fr;
+                }
+                
+                .modal-container {
+                    margin: 20px;
+                    padding: 20px;
+                }
+            }
+
+        </style>
 
         <title>Gráfico de Rosca Simulado</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -910,24 +1238,24 @@ $mesAtual = date('M');
 
                 <!-- Courses Section -->
                 <div class="courses-section">
-                    <div class="add-course-card">
-                        +
-                    </div>
-                    
+                    <button class="create-btn" id="openModalBtn" onclick="openModal()">
+                        <div class="add-course-card">+</div>
+                    </button>
+
                     <?php foreach ($usuario['cursos'] as $index => $curso): ?>
-                    <div class="course-card <?php echo $index == 1 ? 'purple' : ''; ?>">
-                        <div class="course-menu">
-                            <i class="fas fa-ellipsis-v"></i>
+                        <div class="course-card <?php echo $index == 1 ? 'purple' : ''; ?>">
+                            <div class="course-menu">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </div>
+                            <div class="course-icon">
+                                <i class="fas fa-<?php echo $index == 0 ? 'drafting-compass' : 'cube'; ?>"></i>
+                            </div>
+                            <h3><?= htmlspecialchars($curso['nome']) ?></h3>
+                            <p><?= htmlspecialchars($curso['descricao']) ?></p>
                         </div>
-                        <div class="course-icon">
-                            <i class="fas fa-<?php echo $index == 0 ? 'drafting-compass' : 'cube'; ?>"></i>
-                        </div>
-                        <h3><?php echo $curso['nome']; ?></h3>
-                        <p><?php echo $curso['descricao']; ?></p>
-                    </div>
                     <?php endforeach; ?>
                 </div>
-            </div>
+                            </div>
 
             <!-- Right Section -->
             <div class="right-section">
@@ -1008,6 +1336,167 @@ $mesAtual = date('M');
             </div>
         </div>
     </div>
+
+           <!-- MODAL -->
+<div class="modal-overlay" id="courseModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                Criar Novo Curso
+                <span class="edit-icon"><i class="fa-solid fa-pen"></i></span>
+            </h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+
+ <form class="modal-content" id="courseForm" method="POST" action="" enctype="multipart/form-data">
+    <input type="hidden" name="acao" value="criar_curso" />
+  <div class="upload-area" style="cursor:pointer;">
+    <div class="upload-content" id="uploadContent">
+      <div class="upload-icon" id="uploadIcon">
+        <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+        </svg>
+      </div>
+      <button type="button" class="upload-btn" id="uploadBtn">Adicionar Arquivo</button>
+      <input type="file" id="fileInput" name="img_curso" style="display:none" accept="image/*" />
+    </div>
+
+    <!-- Preview da imagem -->
+    <div id="previewContainer" style="margin-top:10px; text-align:center; position: relative;">
+      <div class="image-preview" id="imagePreview" style="display:none;">
+        <img 
+          id="previewImg" 
+          src="" 
+          alt="Preview" 
+          style="max-width: 100%; max-height: 200px; border-radius: 8px; cursor: pointer;" 
+          onclick="changeImage()"
+          title="Clique para trocar a imagem"
+        >
+        <button 
+          type="button" 
+          class="action-btn delete-btn" 
+          onclick="deleteImage()" 
+          title="Deletar imagem"
+          style="
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-weight: bold;
+            line-height: 20px;
+            text-align: center;
+            padding: 0;
+          "
+        >&times;</button>
+      </div>
+    </div>
+  </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="courseName">
+                        Nome do Curso<span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="courseName" 
+                        name="courseName" 
+                        class="form-input"
+                        placeholder="Ex: Design de materiais industriais"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="subtitle">Subtítulo</label>
+                    <input 
+                        type="text" 
+                        id="subtitle" 
+                        name="subtitle" 
+                        class="form-input"
+                        placeholder="Ex: Fundamentos de design"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="duration">
+                        Tempo<span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="duration" 
+                        name="duration" 
+                        class="form-input"
+                        placeholder="Ex: 40 horas"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="modality">
+                        Modalidade<span class="required">*</span>
+                    </label>
+                    <select id="modality" name="modality" class="form-select" required>
+                        <option value="">Selecione</option>
+                        <option value="Presencial">Presencial</option>
+                        <option value="Online">Online</option>
+                        <option value="Híbrido">Híbrido</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="location">Unidade Local</label>
+                    <input 
+                        type="text" 
+                        id="location" 
+                        name="location" 
+                        class="form-input"
+                        placeholder="Opcional"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="deadline">Data Limite</label>
+                    <input 
+                        type="date" 
+                        id="deadline" 
+                        name="deadline" 
+                        class="form-input"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label class="form-label" for="description">
+                    Descrição<span class="required">*</span>
+                </label>
+                <textarea 
+                    id="description" 
+                    name="description" 
+                    class="form-textarea"
+                    placeholder="Descrição do curso"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                    CANCELAR
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    CRIAR
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
     <script>
         // Animação do progresso circular
@@ -1229,6 +1718,68 @@ new Chart(document.getElementById("frequenciaSemanaChart"), {
   },
   plugins: [ChartDataLabels] // <-- ATIVANDO o plugin aqui!
 });
+
+// Modal
+const modal = document.getElementById('courseModal');
+
+function openModal() {
+    modal.classList.add('modal-visible');
+}
+
+function closeModal() {
+    modal.classList.remove('modal-visible');
+}
+
+// Fechar modal ao clicar no botão de fechar
+const closeBtn = modal.querySelector('.close-btn');
+closeBtn.addEventListener('click', closeModal);
+
+// Fechar modal clicando fora
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        closeModal();
+    }
+});
+
+// Upload de imagem
+const fileInput = document.getElementById('fileInput');
+const previewImg = document.getElementById('previewImg');
+const imagePreview = document.getElementById('imagePreview');
+const uploadIcon = document.getElementById('uploadIcon');
+const uploadBtn = document.getElementById('uploadBtn');
+
+uploadBtn.addEventListener('click', function() {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            imagePreview.style.display = 'inline-block';
+            uploadIcon.style.display = 'none';
+            uploadBtn.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+function changeImage() {
+    fileInput.click();
+}
+
+function deleteImage() {
+    if (confirm('Tem certeza que deseja excluir a imagem?')) {
+        previewImg.src = '';
+        fileInput.value = '';
+        imagePreview.style.display = 'none';
+        uploadIcon.style.display = 'block';
+        uploadBtn.style.display = 'inline-block';
+    }
+}
+
 
   </script>
 

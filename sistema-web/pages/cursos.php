@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../conexao.php';
+require_once '../conexao.php';
 
 $nome = $_SESSION['nome_usuario'] ?? 'Visitante';
 
@@ -15,63 +15,117 @@ $mensagem = '';
 $tipo_mensagem = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Coletando os dados do formulário
-    $nome_curso = $_POST['courseName'] ?? '';
-    $subtitulo = $_POST['subtitle'] ?? '';
-    $tempo = $_POST['duration'] ?? '';
-    $modalidade = $_POST['modality'] ?? '';
-    $local = $_POST['location'] ?? '';
-    $data_limite = $_POST['deadline'] ?? null;
-    $descricao = $_POST['description'] ?? '';
+    $acao = $_POST['acao'] ?? '';
 
-    $nome_imagem = "";
+    // === CRIAR CURSO ===
+    if ($acao == 'criar_curso') {
+        $nome_curso = $_POST['courseName'] ?? '';
+        $subtitulo = $_POST['subtitle'] ?? '';
+        $tempo = $_POST['duration'] ?? '';
+        $modalidade = $_POST['modality'] ?? '';
+        $local = $_POST['location'] ?? '';
+        $data_limite = $_POST['deadline'] ?? null;
+        $descricao = $_POST['description'] ?? '';
+        $nome_imagem = '';
 
-    // Upload da imagem
-    if (isset($_FILES['img_curso']) && $_FILES['img_curso']['error'] === UPLOAD_ERR_OK) {
-        $arquivoTmp = $_FILES['img_curso']['tmp_name'];
-        $nomeOriginal = $_FILES['img_curso']['name'];
-        $extensao = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
+        // Upload da imagem
+        if (isset($_FILES['img_curso']) && $_FILES['img_curso']['error'] === UPLOAD_ERR_OK) {
+            $arquivoTmp = $_FILES['img_curso']['tmp_name'];
+            $nomeOriginal = $_FILES['img_curso']['name'];
+            $extensao = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
 
-        $extPermitidas = ['jpg', 'jpeg', 'png', 'gif'];
-        if (in_array($extensao, $extPermitidas)) {
-            $nome_imagem = uniqid('curso_') . '.' . $extensao;
-            $destino = '../uploads/' . $nome_imagem;
+            $extPermitidas = ['jpg', 'jpeg', 'png', 'gif'];
+            if (in_array($extensao, $extPermitidas)) {
+                $nome_imagem = uniqid('curso_') . '.' . $extensao;
+                $destino = '../uploads/' . $nome_imagem;
 
-            // Salvar fisicamente
-            if (!move_uploaded_file($arquivoTmp, $destino)) {
-                $_SESSION['mensagem'] = "Erro ao salvar a imagem.";
+                if (!move_uploaded_file($arquivoTmp, $destino)) {
+                    $_SESSION['mensagem'] = "Erro ao salvar a imagem.";
+                    $_SESSION['tipo_mensagem'] = "error";
+                    $_SESSION['abrir_modal'] = true;
+                    header("Location: cursos.php");
+                    exit;
+                }
+            } else {
+                $_SESSION['mensagem'] = "Formato de imagem não permitido. Envie jpg, jpeg, png ou gif.";
                 $_SESSION['tipo_mensagem'] = "error";
                 $_SESSION['abrir_modal'] = true;
                 header("Location: cursos.php");
                 exit;
             }
-        } else {
-            $_SESSION['mensagem'] = "Formato de imagem não permitido. Envie jpg, jpeg, png ou gif.";
+        }
+
+        try {
+            $stmt = $pdo->prepare("INSERT INTO cursos_web (nome_curso, subtitulo, tempo, modalidade, local, data_limite, descricao, img_curso, criado_em) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+            $stmt->execute([$nome_curso, $subtitulo, $tempo, $modalidade, $local, $data_limite, $descricao, $nome_imagem]);
+
+            $_SESSION['mensagem'] = "Curso criado com sucesso!";
+            $_SESSION['tipo_mensagem'] = "success";
+        } catch (PDOException $e) {
+            $_SESSION['mensagem'] = "Erro ao salvar o curso: " . $e->getMessage();
             $_SESSION['tipo_mensagem'] = "error";
             $_SESSION['abrir_modal'] = true;
-            header("Location: cursos.php");
-            exit;
         }
     }
 
-    try {
-        $stmt = $pdo->prepare("INSERT INTO cursos_web (nome_curso, subtitulo, tempo, modalidade, local, data_limite, descricao, img_curso, criado_em) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-        $stmt->execute([$nome_curso, $subtitulo, $tempo, $modalidade, $local, $data_limite, $descricao, $nome_imagem]);
+    // === DELETAR CURSO ===
+    if ($acao == 'deletar_curso' && isset($_POST['curso_id'])) {
+        $cursoId = intval($_POST['curso_id']);
 
-        $_SESSION['mensagem'] = "Curso criado com sucesso!";
-        $_SESSION['tipo_mensagem'] = "success";
-        header("Location: cursos.php");
-        exit;
-    } catch (PDOException $e) {
-        $_SESSION['mensagem'] = "Erro ao salvar o curso: " . $e->getMessage();
-        $_SESSION['tipo_mensagem'] = "error";
-        $_SESSION['abrir_modal'] = true;
-        header("Location: cursos.php");
-        exit;
+        try {
+            $stmt = $pdo->prepare("DELETE FROM cursos_web WHERE id_curso = ?");
+            $stmt->execute([$cursoId]);
+
+            $_SESSION['mensagem'] = "Curso deletado com sucesso!";
+            $_SESSION['tipo_mensagem'] = "success";
+        } catch (PDOException $e) {
+            $_SESSION['mensagem'] = "Erro ao deletar o curso: " . $e->getMessage();
+            $_SESSION['tipo_mensagem'] = "error";
+        }
     }
+
+    // === DUPLICAR CURSO ===
+    if ($acao === 'duplicar_curso' && isset($_POST['curso_id'])) {
+        $cursoId = intval($_POST['curso_id']);
+
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM cursos_web WHERE id_curso = ?");
+            $stmt->execute([$cursoId]);
+            $cursoOriginal = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($cursoOriginal) {
+                $novoNome = $cursoOriginal['nome_curso'] . " (Cópia)";
+
+                $stmtIns = $pdo->prepare("INSERT INTO cursos_web (nome_curso, subtitulo, tempo, modalidade, local, data_limite, descricao, img_curso, criado_em) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+                $stmtIns->execute([
+                    $novoNome,
+                    $cursoOriginal['subtitulo'],
+                    $cursoOriginal['tempo'],
+                    $cursoOriginal['modalidade'],
+                    $cursoOriginal['local'],
+                    $cursoOriginal['data_limite'],
+                    $cursoOriginal['descricao'],
+                    $cursoOriginal['img_curso']
+                ]);
+
+                $_SESSION['mensagem'] = "Curso duplicado com sucesso!";
+                $_SESSION['tipo_mensagem'] = "success";
+            } else {
+                $_SESSION['mensagem'] = "Curso original não encontrado.";
+                $_SESSION['tipo_mensagem'] = "error";
+            }
+        } catch (PDOException $e) {
+            $_SESSION['mensagem'] = "Erro ao duplicar o curso: " . $e->getMessage();
+            $_SESSION['tipo_mensagem'] = "error";
+        }
+    }
+
+    // Redirecionar após qualquer POST para evitar reenvio
+    header("Location: cursos.php");
+    exit;
 }
 
-// Busca dos cursos recentes (exemplo para a sua seção de "Criados recentemente")
+// Busca dos cursos recentes
 try {
     $stmt = $pdo->query("SELECT * FROM cursos_web ORDER BY criado_em DESC LIMIT 5");
     $recentCourses = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -79,10 +133,11 @@ try {
     $recentCourses = [];
 }
 
+// Buscar cursos criados recentemente (ex: últimos 10 cursos)
+$stmt = $pdo->query("SELECT * FROM cursos_web ORDER BY criado_em DESC LIMIT 10");
+$recentCourses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
-
-
 
 
 <!DOCTYPE html>
@@ -352,10 +407,11 @@ try {
         .recent-list {
             background: white;
             border-radius: 16px;
-            overflow: hidden;
+            overflow: visible;   /* Permite o dropdown sair da div */
             height: auto;
             width: auto;
             padding: 30px;
+            position: relative;   
         }
         .recent-item {
             display: flex;
@@ -675,6 +731,75 @@ try {
                 }
             }
 
+            /* Botão de mais infomações cursos */
+              .dropdown-container {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            min-width: 160px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            border: 1px solid #f3f4f6;
+        }
+
+        .dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #1a1a2e;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background: #f9fafb;
+        }
+
+        .dropdown-item:first-child {
+            border-radius: 12px 12px 0 0;
+        }
+
+        .dropdown-item:last-child {
+            border-radius: 0 0 12px 12px;
+        }
+
+        .dropdown-item.delete {
+            color: #dc2626;
+        }
+
+        .dropdown-item.delete:hover {
+            background: #fef2f2;
+        }
+
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+        }
+
         </style>
 
 </head>
@@ -819,7 +944,7 @@ try {
             <div class="recent-list">
                 <?php if (!empty($recentCourses)): ?>
                     <?php foreach ($recentCourses as $curso): ?>
-                        <div class="recent-item">
+                        <div class="recent-item dropdown-container" data-curso-id="<?= $curso['id_curso'] ?>">
                             <div class="recent-icon">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
                                     <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h8c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
@@ -835,9 +960,39 @@ try {
                                     ?>
                                 </div>
                             </div>
-                            <div class="recent-tag">Design</div>
-                            <button class="more-btn">⋮</button>
+                            <div class="recent-tag">
+                                <?php 
+                                // Pega o nome do curso
+                                $titulo = $curso['nome_curso'] ?? '';
+                                // Separa as palavras por espaço
+                                $palavras = explode(' ', trim($titulo));
+                                // Pega a primeira palavra, se existir
+                                echo htmlspecialchars($palavras[0] ?? '');
+                            ?>
+                            </div>
+                        <button class="more-btn" onclick="toggleDropdown(this)">⋮</button>
+                        <div class="dropdown-menu">
+                            
+                            <!-- DUPLICAR -->
+                            <form method="POST" action="cursos.php" style="display:inline;">
+                                <input type="hidden" name="acao" value="duplicar_curso" />
+                                <input type="hidden" name="curso_id" value="<?= $curso['id_curso'] ?>" />
+                                <button type="submit" class="dropdown-item">
+                                    <i class="fas fa-copy"></i> Duplicar
+                                </button>
+                            </form>
+
+                            <!-- EXCLUIR -->
+                            <form method="POST" action="cursos.php" onsubmit="return confirm('Deseja realmente excluir este curso?');" style="display:inline;">
+                                <input type="hidden" name="acao" value="deletar_curso" />
+                                <input type="hidden" name="curso_id" value="<?= $curso['id_curso'] ?>" />
+                                <button type="submit" class="dropdown-item delete">
+                                    <i class="fas fa-trash-alt"></i> Excluir
+                                </button>
+                            </form>
+
                         </div>
+                                                </div>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <p>Nenhum curso criado recentemente.</p>
@@ -852,12 +1007,13 @@ try {
         <div class="modal-header">
             <h2 class="modal-title">
                 Criar Novo Curso
-                <span class="edit-icon">✏️</span>
+                <span class="edit-icon"><i class="fa-solid fa-pen"></i></span>
             </h2>
             <button class="close-btn" onclick="closeModal()">&times;</button>
         </div>
 
  <form class="modal-content" id="courseForm" method="POST" action="" enctype="multipart/form-data">
+    <input type="hidden" name="acao" value="criar_curso" />
   <div class="upload-area" style="cursor:pointer;">
     <div class="upload-content" id="uploadContent">
       <div class="upload-icon" id="uploadIcon">
@@ -1006,88 +1162,143 @@ try {
 </div>
 
        <script>
-    // Interatividade nos cards
-    document.querySelectorAll('.course-card:not(.add)').forEach(card => {
-        card.addEventListener('click', function() {
-            console.log('Curso selecionado:', this.querySelector('.course-title').textContent);
-        });
+// Interatividade nos cards
+document.querySelectorAll('.course-card:not(.add)').forEach(card => {
+    card.addEventListener('click', function() {
+        console.log('Curso selecionado:', this.querySelector('.course-title').textContent);
     });
+});
 
-    // Botões de mais opções
-    document.querySelectorAll('.more-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            alert('Menu de opções');
-        });
+// Botões de mais opções
+let currentCourseItem = null;
+
+function toggleDropdown(button) {
+    const dropdown = button.nextElementSibling;
+    closeAllDropdowns();
+    dropdown.classList.toggle('active');
+}
+
+function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
+        menu.classList.remove('active');
     });
+}
 
-    // Card de adicionar novo curso
-    document.querySelector('.course-card.add').addEventListener('click', function() {
-        openModal();
-    });
+// Função para duplicar curso via POST
+function duplicateCourse(button) {
+    const cursoId = button.getAttribute('data-id');
+    if (confirm('Deseja duplicar este curso?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.style.display = 'none';
 
-    // Modal
-    const modal = document.getElementById('courseModal');
-    const openModalBtn = document.getElementById('openModalBtn');
+        const acao = document.createElement('input');
+        acao.name = 'acao';
+        acao.value = 'duplicar_curso';
 
-    function openModal() {
-        modal.classList.add('modal-visible');
+        const idInput = document.createElement('input');
+        idInput.name = 'curso_id';
+        idInput.value = cursoId;
+
+        form.appendChild(acao);
+        form.appendChild(idInput);
+
+        document.body.appendChild(form);
+        form.submit();
     }
+    closeAllDropdowns();
+}
 
-    function closeModal() {
-        modal.classList.remove('modal-visible');
+function confirmDelete(button) {
+    currentCourseItem = button.closest('.course-item');
+    document.getElementById('deleteModal').classList.add('active');
+    closeAllDropdowns();
+}
+
+function deleteCourse() {
+    if (currentCourseItem) {
+        currentCourseItem.style.transform = 'translateX(100%)';
+        currentCourseItem.style.opacity = '0';
+
+        setTimeout(() => {
+            currentCourseItem.remove();
+            currentCourseItem = null;
+        }, 300);
     }
+}
 
-    // Fechar modal ao clicar no botão de fechar
-    const closeBtn = modal.querySelector('.close-btn');
-    closeBtn.addEventListener('click', closeModal);
-
-    // Fechar modal clicando fora
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-
-    // Upload de imagem
-    const fileInput = document.getElementById('fileInput');
-    const previewImg = document.getElementById('previewImg');
-    const imagePreview = document.getElementById('imagePreview');
-    const uploadIcon = document.getElementById('uploadIcon');
-    const uploadBtn = document.getElementById('uploadBtn');
-
-    // Botão "Adicionar Arquivo" abre o seletor de arquivos
-    uploadBtn.addEventListener('click', function() {
-        fileInput.click();
-    });
-
-    fileInput.addEventListener('change', function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                imagePreview.style.display = 'inline-block';  // Mostra preview + botão delete
-                uploadIcon.style.display = 'none';            // Esconde o ícone
-                uploadBtn.style.display = 'none';             // Esconde o botão
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    function changeImage() {
-        fileInput.click();
+// Fechar dropdowns ao clicar fora
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.more-btn') && !event.target.closest('.dropdown-menu')) {
+        closeAllDropdowns();
     }
+});
 
-    function deleteImage() {
-        if (confirm('Tem certeza que deseja excluir a imagem?')) {
-            previewImg.src = '';
-            fileInput.value = '';
-            imagePreview.style.display = 'none';
-            uploadIcon.style.display = 'block';
-            uploadBtn.style.display = 'inline-block';
-        }
+// Card de adicionar novo curso
+document.querySelector('.course-card.add').addEventListener('click', function() {
+    openModal();
+});
+
+// Modal
+const modal = document.getElementById('courseModal');
+
+function openModal() {
+    modal.classList.add('modal-visible');
+}
+
+function closeModal() {
+    modal.classList.remove('modal-visible');
+}
+
+// Fechar modal ao clicar no botão de fechar
+const closeBtn = modal.querySelector('.close-btn');
+closeBtn.addEventListener('click', closeModal);
+
+// Fechar modal clicando fora
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        closeModal();
     }
+});
+
+// Upload de imagem
+const fileInput = document.getElementById('fileInput');
+const previewImg = document.getElementById('previewImg');
+const imagePreview = document.getElementById('imagePreview');
+const uploadIcon = document.getElementById('uploadIcon');
+const uploadBtn = document.getElementById('uploadBtn');
+
+uploadBtn.addEventListener('click', function() {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            imagePreview.style.display = 'inline-block';
+            uploadIcon.style.display = 'none';
+            uploadBtn.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+function changeImage() {
+    fileInput.click();
+}
+
+function deleteImage() {
+    if (confirm('Tem certeza que deseja excluir a imagem?')) {
+        previewImg.src = '';
+        fileInput.value = '';
+        imagePreview.style.display = 'none';
+        uploadIcon.style.display = 'block';
+        uploadBtn.style.display = 'inline-block';
+    }
+}
 </script>
 
     </body>

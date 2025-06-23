@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../conexao.php';
 
 
 $nome = $_SESSION['nome_usuario'] ?? 'Visitante';
@@ -16,9 +17,19 @@ $totalAlunos = 100;
 $concluidos = 72;
 $progresso = ($concluidos / $totalAlunos) * 100;
 
-// Cursos aplicados e quantidade de alunos
-$cursos = ['NR-10', 'NR-35', 'Espaço Confinado', 'Soldagem', 'Eletricista'];
-$quantidades = [25, 20, 18, 22, 15];
+// Cursos aplicados; quantidade de alunos e modalidades
+$cursos = [];
+$quantidades = [];
+
+try {
+    $stmt = $pdo->query("SELECT modalidade, COUNT(*) AS total FROM cursos_web GROUP BY modalidade");
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $cursos[] = $row['modalidade'];
+        $quantidades[] = $row['total'];
+    }
+} catch (PDOException $e) {
+    echo "Erro ao buscar os cursos: " . $e->getMessage();
+}
 
 // Desempenho por mês (simulado)
 $meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
@@ -434,15 +445,15 @@ new Chart(document.getElementById('grafico2'), {
   plugins: [centerTextPlugin] // ativa o plugin personalizado
 });
 
-const cursos = <?php echo json_encode($cursos); ?>;
-const quantidades = <?php echo json_encode($quantidades); ?>;
+const cursos = <?= json_encode($cursos) ?>;
+const quantidades = <?= json_encode($quantidades) ?>;
 
 new Chart(document.getElementById('grafico1'), {
   type: 'bar',
   data: {
     labels: cursos,
     datasets: [{
-      label: 'Alunos por curso',
+      label: 'Cursos por Modalidade',
       data: quantidades,
       backgroundColor: [
         '#6E6EFF', 
@@ -462,13 +473,13 @@ new Chart(document.getElementById('grafico1'), {
         display: false
       }
     },
-     scales: {
+    scales: {
       x: {
         grid: {
           display: false
         },
         ticks: {
-          color: 'black',      // cor das legendas
+          color: 'black',
           font: {
             size: 14,
             family: 'Poppins, sans-serif',
@@ -483,7 +494,7 @@ new Chart(document.getElementById('grafico1'), {
           display: false
         },
         ticks: {
-          color: '#black',      // cor dos números do eixo Y
+          color: 'black',
           font: {
             size: 14,
             family: 'Poppins, sans-serif',
@@ -495,7 +506,6 @@ new Chart(document.getElementById('grafico1'), {
     }
   }
 });
-
 
     const meses = <?php echo json_encode($meses); ?>;
   const concluidosPorMes = <?php echo json_encode($concluidosPorMes); ?>;
