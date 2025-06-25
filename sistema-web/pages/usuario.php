@@ -108,6 +108,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_mudancas'])) {
             min-height: 100vh;
             display: flex;
         }
+        a {
+        color: white;
+        text-decoration: none;
+        }
+
 
         /* Sidebar */
         .sidebar {
@@ -507,7 +512,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_mudancas'])) {
             <img class="logo2"  src="../img/logo2.png" alt=""></img>
         </div>
         
-        <div class="nav-item active">
+        <div class="nav-item ">
          <a href="../index.php" title="Cursos">
             <i class="fas fa-th-large"></i>
         </a>
@@ -524,14 +529,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['salvar_mudancas'])) {
             <i class="fas fa-chart-bar"></i>
             </a>
         </div>
-        
-        <div class="nav-item">
-                     <a href="chat.php" title="Cursos">
-            <i class="fas fa-file-alt"></i>
-        </a>
-        </div>
-        
-        <div class="nav-item">
+                
+        <div class="nav-item active">
          <a href="usuario.php" title="Cursos">
             <i class="fas fa-user"></i>
             </a>

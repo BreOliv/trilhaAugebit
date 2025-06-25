@@ -162,6 +162,12 @@ $recentCourses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             display: flex;
         }
 
+        a {
+        color: white;
+        text-decoration: none;
+        }
+
+
         /* Sidebar */
         .sidebar {
             width: 80px;
@@ -810,13 +816,13 @@ $recentCourses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <img class="logo2"  src="../img/logo2.png" alt=""></img>
         </div>
         
-        <div class="nav-item active">
+        <div class="nav-item">
          <a href="../index.php" title="Cursos">
             <i class="fas fa-th-large"></i>
         </a>
         </div>
         
-        <div class="nav-item">
+        <div class="nav-item active">
             <a href="cursos.php" title="Cursos">
             <i class="fas fa-folder"></i>
             </a>
@@ -827,15 +833,9 @@ $recentCourses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <i class="fas fa-chart-bar"></i>
             </a>
         </div>
-        
+                
         <div class="nav-item">
-                     <a href="chat.php" title="Cursos">
-            <i class="fas fa-file-alt"></i>
-        </a>
-        </div>
-        
-        <div class="nav-item">
-         <a href="usuario.php" title="Cursos">
+         <a href="usuario.php" title="Usuario">
             <i class="fas fa-user"></i>
             </a>
         </div>

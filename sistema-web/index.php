@@ -181,7 +181,6 @@ $cursos_recentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             display: flex;
         }
         a {
-            
         color: white;
         text-decoration: none;
         }
@@ -1164,13 +1163,7 @@ $cursos_recentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <i class="fas fa-chart-bar"></i>
             </a>
         </div>
-        
-        <div class="nav-item">
-                     <a href="pages/chat.php" title="Cursos">
-            <i class="fas fa-file-alt"></i>
-        </a>
-        </div>
-        
+                
         <div class="nav-item">
          <a href="pages/usuario.php" title="Cursos">
             <i class="fas fa-user"></i>
@@ -1259,7 +1252,7 @@ $cursos_recentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <!-- Right Section -->
             <div class="right-section">
-                <!-- Calendar -->
+                <!-- Calendário -->
                 <div class="calendar-card">
                     <div class="calendar-header">
                         <h3>Calendário</h3>
@@ -1298,8 +1291,8 @@ $cursos_recentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="chat-item" data-id="1">
                 <div class="chat-avatar">N</div>
                 <div class="chat-info">
-                    <h4>Nome do curso</h4>
-                    <p>Nome do funcionário</p>
+                    <h4>Introdução ao Marketing Digital</h4>
+                    <p>Marcos Marcelo</p>
                 </div>
                 <div class="chat-right">
                     <span class="chat-time">21:55</span>
@@ -1312,7 +1305,7 @@ $cursos_recentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="chat-item" data-id="2">
                 <div class="chat-avatar">M</div>
                 <div class="chat-info">
-                    <h4>Matemática Básica</h4>
+                    <h4>Fundamentos de Instrumentos</h4>
                     <p>Maria Silva</p>
                 </div>
                 <div class="chat-right">

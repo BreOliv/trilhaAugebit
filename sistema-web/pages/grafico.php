@@ -69,10 +69,10 @@ $frequencia = ($alunosComFrequencia / $totalAlunos) * 100;
             min-height: 100vh;
             display: flex;
         }
-        /* a {
-            text-decoration: none;
-            color: white;
-        } */
+        a {
+        color: white;
+        text-decoration: none;
+        }
 
         /* Sidebar */
         .sidebar {
@@ -290,7 +290,7 @@ $frequencia = ($alunosComFrequencia / $totalAlunos) * 100;
             <img class="logo2"  src="../img/logo2.png" alt=""></img>
         </div>
         
-        <div class="nav-item active">
+        <div class="nav-item ">
          <a href="../index.php" title="Cursos">
             <i class="fas fa-th-large"></i>
         </a>
@@ -302,18 +302,12 @@ $frequencia = ($alunosComFrequencia / $totalAlunos) * 100;
             </a>
         </div>
         
-        <div class="nav-item">
-             <a href="grafico.php" title="Cursos">
+        <div class="nav-item active">
+             <a href="grafico.php" title="Gráficos">
             <i class="fas fa-chart-bar"></i>
             </a>
         </div>
-        
-        <div class="nav-item">
-                     <a href="chat.php" title="Cursos">
-            <i class="fas fa-file-alt"></i>
-        </a>
-        </div>
-        
+                
         <div class="nav-item">
          <a href="usuario.php" title="Cursos">
             <i class="fas fa-user"></i>
